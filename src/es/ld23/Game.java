@@ -1,17 +1,19 @@
 package es.ld23;
 
-import org.newdawn.slick.openal.Audio;
-import org.lwjgl.util.Point;
+import es.ld23.util.Console;
 import java.io.IOException;
-import org.newdawn.slick.opengl.Texture;
-import es.ld23.util.Noise;
 import java.util.Random;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
+import org.lwjgl.util.Point;
+import org.newdawn.slick.openal.Audio;
 import org.newdawn.slick.openal.AudioLoader;
 import org.newdawn.slick.opengl.TextureLoader;
+import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.util.ResourceLoader;
 import static org.lwjgl.opengl.GL11.*;
+import es.ld23.util.Noise;
+import org.newdawn.slick.Color;
 
 public class Game {
 
@@ -27,7 +29,9 @@ public class Game {
 	private int m_d_x;
 	private int m_d_y;
 	private Point punteroLocation = new Point(0, 0);
-	
+	//propios
+	private Console console;
+	private Color textoNormal;
 	//recursos
 	private Texture puntero = null;
 	private Audio explosion = null;
@@ -48,6 +52,11 @@ public class Game {
 
 		colorFlag = r.nextDouble();
 		System.out.println(colorFlag);
+
+		textoNormal = Color.blue;
+
+		console = new Console(100, 100, 200, 75);
+		console.addString("Test Line. All this text is the same line. The code fit this text inside the area designated to console...at least for width, will fix height later :)", textoNormal);
 	}
 
 	public void initGL() {
@@ -61,7 +70,7 @@ public class Game {
 
 		glEnable(GL_TEXTURE_2D);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		
+
 		Mouse.setGrabbed(true);
 	}
 
@@ -79,16 +88,24 @@ public class Game {
 
 	public void render() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glDisable(GL_BLEND);
-		if (backgroundListRebuild) {
+//		glDisable(GL_BLEND);
+		{/*code_block
+			if (backgroundListRebuild) {
 			backgroundList = glGenLists(1);
 			glNewList(backgroundList, GL_COMPILE);
 			renderBackground();
 			glEndList();
 			backgroundListRebuild = false;
+			}
+			glCallList(backgroundList);
+			//end_block*/
+
 		}
-		glCallList(backgroundList);
-		glEnable(GL_BLEND);
+
+		{
+			console.render();
+		}
+
 		renderPuntero();
 	}
 
@@ -99,10 +116,12 @@ public class Game {
 					Mouse.setGrabbed(false);
 					Mouse.setCursorPosition(punteroLocation.getX(), punteroLocation.getY());
 				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_F1)
+				if (Keyboard.getEventKey() == Keyboard.KEY_F1) {
 					explosion.playAsMusic(1, 1, false);
-				if (Keyboard.getEventKey() == Keyboard.KEY_F2)
+				}
+				if (Keyboard.getEventKey() == Keyboard.KEY_F2) {
 					salto.playAsSoundEffect(1, 1, false);
+				}
 //				if (Keyboard.getEventKey() == Keyboard.KEY_F3)
 //				if (Keyboard.getEventKey() == Keyboard.KEY_F4)
 				if (Keyboard.getEventKey() == Keyboard.KEY_F5) {
@@ -145,9 +164,7 @@ public class Game {
 	}
 
 	private void renderPuntero() {
-
 		if (Mouse.isGrabbed()) {
-
 			int m_x = punteroLocation.getX();
 			int m_y = height - punteroLocation.getY();
 			glEnable(GL_TEXTURE_2D);
