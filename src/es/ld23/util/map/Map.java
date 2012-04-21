@@ -15,8 +15,8 @@ import static org.lwjgl.opengl.GL11.*;
 public class Map {
 
 	private static final Random r = new Random();
-	private int map_f = 40;
-	private int map_c = 40;
+	private int map_f = 50;
+	private int map_c = 50;
 	private Texture textureTiles;
 	private int pixels[];
 	private int p_w;
@@ -101,15 +101,11 @@ public class Map {
 			double n_f = f * 37.5 / w;
 			for (int c = 0; c < map_c; c++) {
 				Tile obj = null;
-				if (f == 0 || f == map_f - 1 || c == 0 || c == map_c - 1) {
+				double noise = Noise.noiseNormalizado(c * 29.25 / h, n_f, 3);
+				if (noise > 0.65) {
 					obj = water;
 				} else {
-					double noise = Noise.noiseNormalizado(c * 29.25 / h, n_f, 3);
-					if (noise > 0.65) {
-						obj = water;
-					} else {
-						obj = Tile.MarHierva[4];
-					}
+					obj = Tile.MarHierva[4];
 				}
 				setTile(f, c, obj);
 			}
@@ -132,16 +128,34 @@ public class Map {
 							}
 							setTile(f, c, Tile.MarHierva[0]);
 						} else if (down == water) {
-							setTile(f,c,Tile.MarHierva[6]);
+							setTile(f, c, Tile.MarHierva[6]);
 						} else {
-							setTile(f,c,Tile.MarHierva[3]);
+							setTile(f, c, Tile.MarHierva[3]);
 						}
 					} else if (right == water) {
-						
+						if (top == water) {
+							if (down == water) {
+								setTile(f + 1, c, Tile.MarHierva[4]);
+							}
+							setTile(f, c, Tile.MarHierva[2]);
+						} else if (down == water) {
+							setTile(f, c, Tile.MarHierva[8]);
+						} else {
+							setTile(f, c, Tile.MarHierva[5]);
+						}
 					} else if (top == water) {
-						setTile(f,c,Tile.MarHierva[1]);
-					} else if (down==water)
-						setTile(f,c,Tile.MarHierva[7]);
+						setTile(f, c, Tile.MarHierva[1]);
+					} else if (down == water) {
+						setTile(f, c, Tile.MarHierva[7]);
+					} else if (getTile(f - 1, c - 1) == water) {
+						setTile(f, c, Tile.HiervaMar[0]);
+					} else if (getTile(f - 1, c + 1) == water) {
+						setTile(f, c, Tile.HiervaMar[1]);
+					} else if (getTile(f + 1, c - 1) == water) {
+						setTile(f, c, Tile.HiervaMar[2]);
+					} else if (getTile(f + 1, c + 1) == water) {
+						setTile(f, c, Tile.HiervaMar[3]);
+					}
 				}
 			}
 		}
