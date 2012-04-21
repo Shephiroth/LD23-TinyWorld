@@ -16,7 +16,8 @@ import org.lwjgl.opengl.DisplayMode;
  * start() will be the applet start point
  * main() will be the program start point
  * both will iniciallice LWJGL, applet will use a canvas and application will let lwjgl to create.
- * @author Jorge
+ * @author Jorge Barcelo
+ * @email shephiroth@hotmail.com
  */
 public class DualStart extends Applet {
 
