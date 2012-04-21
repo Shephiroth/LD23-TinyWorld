@@ -15,6 +15,8 @@ import static org.lwjgl.opengl.GL11.*;
 public class Map {
 
 	private static final Random r = new Random();
+	private int map_f = 40;
+	private int map_c = 40;
 	private Texture textureTiles;
 	private int pixels[];
 	private int p_w;
@@ -24,15 +26,19 @@ public class Map {
 	private int list;
 
 	public Map() {
+		Noise.randomize();
 		nuevo();
 	}
 
 	private Tile getTile(int f, int c) {
-		return tiles[f * 40 + c];
+		if (f < 0 || f >= map_f || c < 0 || c >= map_c) {
+			return null;
+		}
+		return tiles[f * map_c + c];
 	}
 
 	private void setTile(int f, int c, Tile t) {
-		tiles[c + f * 40] = t;
+		tiles[c + f * map_c] = t;
 	}
 
 	public void render() {
@@ -76,9 +82,9 @@ public class Map {
 //				renderData((color & 0x00FF0000) / 0x00010000, f, c);
 //			}
 //		}
-		for (int f = 0; f < 40; f++) {
-			for (int c = 0; c < 40; c++) {
-				getTile(f,c).render(f, c);
+		for (int f = 0; f < map_f; f++) {
+			for (int c = 0; c < map_c; c++) {
+				getTile(f, c).render(f, c);
 			}
 		}
 		glEnd();
@@ -86,22 +92,56 @@ public class Map {
 
 	public final void nuevo() {
 		listRebuild = true;
-		tiles = new Tile[40 * 40];
-		int w = Tile.tile_width * 40;
-		int h = Tile.tile_height * 40;
-		for (int f = 0; f < 40; f++) {
+		tiles = new Tile[map_f * map_c];
+		int w = Tile.tile_width * map_c;
+		int h = Tile.tile_height * map_f;
+		Tile water = Tile.Mar[r.nextInt(Tile.Mar.length)];
+		Tile.setWaterLayer(water);
+		for (int f = 0; f < map_f; f++) {
 			double n_f = f * 37.5 / w;
-			for (int c = 0; c < 40; c++) {
-				double n_c = c * 29.25 / h;
-				double noise = Noise.noiseNormalizado(n_c, n_f, 3);
-				if (noise > 0.65) {
-					if (r.nextDouble() > 0.83) {
-						setTile(f,c,Tile.Mar[0]);
-					} else {
-						setTile(f,c,Tile.Mar[1]);
-					}
+			for (int c = 0; c < map_c; c++) {
+				Tile obj = null;
+				if (f == 0 || f == map_f - 1 || c == 0 || c == map_c - 1) {
+					obj = water;
 				} else {
-					setTile(f,c,Tile.MarHierva[4]);
+					double noise = Noise.noiseNormalizado(c * 29.25 / h, n_f, 3);
+					if (noise > 0.65) {
+						obj = water;
+					} else {
+						obj = Tile.MarHierva[4];
+					}
+				}
+				setTile(f, c, obj);
+			}
+		}
+		for (int f = 0; f < map_f; f++) {
+			for (int c = 0; c < map_c; c++) {
+				Tile center = getTile(f, c);
+				Tile left = getTile(f, c - 1);
+				Tile right = getTile(f, c + 1);
+				Tile top = getTile(f - 1, c);
+				Tile down = getTile(f + 1, c);
+				if (center != water) {
+					if (left == water) {
+						if (right == water) {
+							setTile(f, c + 1, Tile.MarHierva[4]);
+						}
+						if (top == water) {
+							if (down == water) {
+								setTile(f + 1, c, Tile.MarHierva[4]);
+							}
+							setTile(f, c, Tile.MarHierva[0]);
+						} else if (down == water) {
+							setTile(f,c,Tile.MarHierva[6]);
+						} else {
+							setTile(f,c,Tile.MarHierva[3]);
+						}
+					} else if (right == water) {
+						
+					} else if (top == water) {
+						setTile(f,c,Tile.MarHierva[1]);
+					} else if (down==water)
+						setTile(f,c,Tile.MarHierva[7]);
 				}
 			}
 		}

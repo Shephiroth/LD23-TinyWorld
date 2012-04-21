@@ -10,9 +10,9 @@ public class Tile {
 		new Tile(34,true), new Tile(50,true), new Tile(66,true)
 	};
 	
-	static {
+	public static void setWaterLayer(Tile water) {
 		for (int i=0;i<MarHierva.length;i++) {
-			MarHierva[i].next = Mar[1];
+			MarHierva[i].next = water;
 		}
 	}
 
