@@ -17,16 +17,16 @@ import static org.lwjgl.opengl.GL11.*;
 public class Map {
 
 	private static final Random r = new Random();
-	private int map_f = 50;
-	private int map_c = 50;
+	private int map_f = 30;
+	private int map_c = 30;
 	private Texture textureTiles;
-	private int pixels[];
-	private int p_w;
-	private int p_h;
 	private Tile tiles[];
 	private boolean listRebuild = true;
 	private int list;
 	private ArrayList<BBRectangle> boundingbox = new ArrayList<BBRectangle>();
+	private BBRectangle mapBB;
+	private int map_w;
+	private int map_h;
 
 	public Map() {
 		Noise.randomize();
@@ -62,12 +62,6 @@ public class Map {
 	public void loadResources() {
 		try {
 			textureTiles = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/tiles.png"), GL_NEAREST);
-			BufferedImage bi = ImageIO.read(Map.class.getResource("/res/level.bmp"));
-			p_w = bi.getWidth();
-			p_h = bi.getHeight();
-			pixels = new int[p_w * p_h];
-			bi.getRGB(0, 0, p_w, p_h, pixels, 0, p_w);
-			bi = null;
 		} catch (IOException ex) {
 			Game.debug("Map::loadResources  ->  " + ex.getMessage());
 		}
@@ -76,15 +70,6 @@ public class Map {
 	private void renderMap() {
 		Noise.randomize();
 		glBegin(GL_QUADS);
-//		for (int f = 0; f < p_h; f++) {
-//			for (int c = 0; c < p_w; c++) {
-//				int color = pixels[f * p_w + c];
-//				if ((color & 0x0F) > 0) {
-//					renderData((color & 0x0000FF00)/ 0x000100, f, c);
-//				}
-//				renderData((color & 0x00FF0000) / 0x00010000, f, c);
-//			}
-//		}
 		for (int f = 0; f < map_f; f++) {
 			for (int c = 0; c < map_c; c++) {
 				getTile(f, c).render(f, c);
@@ -96,15 +81,16 @@ public class Map {
 	public final void nuevo() {
 		listRebuild = true;
 		tiles = new Tile[map_f * map_c];
-		int w = Tile.tile_width * map_c;
-		int h = Tile.tile_height * map_f;
+		map_w = Tile.tile_width * map_c;
+		map_h = Tile.tile_height * map_f;
+		mapBB = new BBRectangle(0, 0, map_w, map_h);
 		Tile water = Tile.Mar[r.nextInt(Tile.Mar.length)];
 		Tile.setWaterLayer(water);
 		for (int f = 0; f < map_f; f++) {
-			double n_f = f * 37.5 / w;
+			double n_f = f * 37.5 / map_w;
 			for (int c = 0; c < map_c; c++) {
 				Tile obj = null;
-				double noise = Noise.noiseNormalizado(c * 29.25 / h, n_f, 3);
+				double noise = Noise.noiseNormalizado(c * 29.25 / map_h, n_f, 3);
 				if (noise > 0.65) {
 					obj = water;
 				} else {
@@ -171,7 +157,7 @@ public class Map {
 					if (n < Tile.FloresHierva.length) {
 						int pos = r.nextBoolean() ? 1 : 0;
 						setTile(f, c, Tile.FloresHierva[n][pos]);
-						createBB(f,c);
+						createBB(f, c);
 					}
 				}
 			}
@@ -179,16 +165,28 @@ public class Map {
 	}
 
 	public boolean isFree(BBRectangle playerBB) {
+		if (!mapBB.isInside(playerBB)) {
+			return false;
+		}
 		if (!boundingbox.isEmpty()) {
 			for (BBRectangle aux : boundingbox) {
-				if (playerBB.collision(aux))
+				if (playerBB.collision(aux)) {
 					return false;
+				}
 			}
 		}
 		return true;
 	}
 
 	private void createBB(int f, int c) {
-		boundingbox.add(new BBRectangle(c*Tile.tile_width, f*Tile.tile_height,Tile.tile_width, Tile.tile_height));
+		boundingbox.add(new BBRectangle(c * Tile.tile_width, f * Tile.tile_height, Tile.tile_width, Tile.tile_height));
+	}
+
+	public int getWidth() {
+		return map_w;
+	}
+
+	public int getHeight() {
+		return map_h;
 	}
 }

@@ -26,6 +26,14 @@ public class BBRectangle {
 		return true;
 	}
 
+	public boolean isInside(BBRectangle interior) {
+		if (left > interior.left || left + width < interior.left + interior.width
+			|| top > interior.top || top + height < interior.top + interior.height) {
+			return false;
+		}
+		return true;
+	}
+
 	public boolean is(BBRectangle other) {
 		return (left == other.left) && (top == other.top)
 			&& (width == other.width) && (height == other.height);

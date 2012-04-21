@@ -39,8 +39,8 @@ public class Tile {
 		}
 	}
 	private static final double texture_prop = 32.0 / 256.0;
-	public static final int tile_width = 16;
-	public static final int tile_height = 16;
+	public static final int tile_width = 48;
+	public static final int tile_height = 48;
 	private int renderData;
 	private boolean walk;
 	private Tile next;
