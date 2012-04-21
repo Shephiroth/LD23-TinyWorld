@@ -1,7 +1,6 @@
 package es.ld23;
 
 import es.ld23.util.Console;
-import es.ld23.util.Noise;
 import java.io.IOException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;

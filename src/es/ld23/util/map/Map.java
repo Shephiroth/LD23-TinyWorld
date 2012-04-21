@@ -15,20 +15,30 @@ import static org.lwjgl.opengl.GL11.*;
 public class Map {
 
 	private static final Random r = new Random();
-	private static final int tile_width = 16;
-	private static final int tile_height = 16;
-	private static final double texture_prop = 32.0 / 256.0;
-	private Texture tiles;
+	private Texture textureTiles;
 	private int pixels[];
 	private int p_w;
 	private int p_h;
+	private Tile tiles[];
 	private boolean listRebuild = true;
 	private int list;
+
+	public Map() {
+		nuevo();
+	}
+
+	private Tile getTile(int f, int c) {
+		return tiles[f * 40 + c];
+	}
+
+	private void setTile(int f, int c, Tile t) {
+		tiles[c + f * 40] = t;
+	}
 
 	public void render() {
 		glEnable(GL_TEXTURE_2D);
 		glEnable(GL_BLEND);
-		tiles.bind();
+		textureTiles.bind();
 		Color.white.bind();
 		if (listRebuild) {
 			list = glGenLists(1);
@@ -42,7 +52,7 @@ public class Map {
 
 	public void loadResources() {
 		try {
-			tiles = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/tiles.png"), GL_NEAREST);
+			textureTiles = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/tiles.png"), GL_NEAREST);
 			BufferedImage bi = ImageIO.read(Map.class.getResource("/res/level.bmp"));
 			p_w = bi.getWidth();
 			p_h = bi.getHeight();
@@ -66,47 +76,34 @@ public class Map {
 //				renderData((color & 0x00FF0000) / 0x00010000, f, c);
 //			}
 //		}
-		int w = tile_width * 40;
-		int h = tile_height * 40;
 		for (int f = 0; f < 40; f++) {
-			double n_f = f * 37.5 / w;
 			for (int c = 0; c < 40; c++) {
-				double n_c = c * 19.25 / h;
-				double noise = Noise.noiseNormalizado(n_c, n_f, 3);
-				if (noise > 0.7) {
-					if (r.nextDouble() > 0.83) {
-						renderData(2, f, c);
-					}else
-					renderData(3, f, c);
-				} else {
-					renderData(49,f,c);
-				}
+				getTile(f,c).render(f, c);
 			}
 		}
 		glEnd();
 	}
 
-	private void renderData(int data, int f, int c) {
-		int t_f = data % 16;
-		int t_c = data / 16;
-
-		double text_left = t_c * texture_prop;
-		double text_top = t_f * texture_prop;
-
-		glTexCoord2d(text_left, text_top);
-		glVertex2d(c * tile_width, f * tile_height);
-
-		glTexCoord2d(text_left, text_top + texture_prop);
-		glVertex2d(c * tile_width, (1 + f) * tile_height);
-
-		glTexCoord2d(text_left + texture_prop, text_top + texture_prop);
-		glVertex2d((1 + c) * tile_width, (1 + f) * tile_height);
-
-		glTexCoord2d(text_left + texture_prop, text_top);
-		glVertex2d((1 + c) * tile_width, f * tile_height);
-	}
-
-	public void nuevo() {
+	public final void nuevo() {
 		listRebuild = true;
+		tiles = new Tile[40 * 40];
+		int w = Tile.tile_width * 40;
+		int h = Tile.tile_height * 40;
+		for (int f = 0; f < 40; f++) {
+			double n_f = f * 37.5 / w;
+			for (int c = 0; c < 40; c++) {
+				double n_c = c * 29.25 / h;
+				double noise = Noise.noiseNormalizado(n_c, n_f, 3);
+				if (noise > 0.65) {
+					if (r.nextDouble() > 0.83) {
+						setTile(f,c,Tile.Mar[0]);
+					} else {
+						setTile(f,c,Tile.Mar[1]);
+					}
+				} else {
+					setTile(f,c,Tile.MarHierva[4]);
+				}
+			}
+		}
 	}
 }
