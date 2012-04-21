@@ -155,6 +155,19 @@ public class Map {
 						setTile(f, c, Tile.HiervaMar[2]);
 					} else if (getTile(f + 1, c + 1) == water) {
 						setTile(f, c, Tile.HiervaMar[3]);
+					} else {
+					}
+				}
+			}
+		}
+
+		for (int f = 0; f < map_f; f++) {
+			for (int c = 0; c < map_c; c++) {
+				if (getTile(f, c) == Tile.MarHierva[4]) {
+					int n = r.nextInt(500);
+					if (n < Tile.FloresHierva.length) {
+						int pos = r.nextBoolean() ? 1 : 0;
+						setTile(f, c, Tile.FloresHierva[n][pos]);
 					}
 				}
 			}
