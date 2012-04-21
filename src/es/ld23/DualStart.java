@@ -8,6 +8,7 @@ import java.applet.Applet;
 import java.awt.BorderLayout;
 import java.awt.Canvas;
 import org.lwjgl.LWJGLException;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.openal.AL;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
@@ -137,6 +138,7 @@ public class DualStart extends Applet {
 		} catch (LWJGLException e) {
 			Game.debug("DualStart::main  ->  " + e.getMessage());
 		}
+		Mouse.setGrabbed(true);
 		gameLoop();
 	}
 }

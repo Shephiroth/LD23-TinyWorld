@@ -43,12 +43,12 @@ public class Console {
 		glColor3d(1, 0, 0);
 		glBegin(GL_LINES);
 		glVertex2i(left, top);
-		glVertex2i(left+width, top);
-		glVertex2i(left+width, top);
-		glVertex2i(left+width, top+height);
-		glVertex2i(left+width, top+height);
-		glVertex2i(left, top+height);
-		glVertex2i(left, top+height);
+		glVertex2i(left + width, top);
+		glVertex2i(left + width, top);
+		glVertex2i(left + width, top + height);
+		glVertex2i(left + width, top + height);
+		glVertex2i(left, top + height);
+		glVertex2i(left, top + height);
 		glVertex2i(left, top);
 		glEnd();
 		glEnable(GL_BLEND);

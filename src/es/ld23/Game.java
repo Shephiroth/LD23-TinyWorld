@@ -1,8 +1,8 @@
 package es.ld23;
 
 import es.ld23.util.Console;
+import es.ld23.util.Noise;
 import java.io.IOException;
-import java.util.Random;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.util.Point;
@@ -12,32 +12,27 @@ import org.newdawn.slick.opengl.TextureLoader;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.util.ResourceLoader;
 import static org.lwjgl.opengl.GL11.*;
-import es.ld23.util.Noise;
+import es.ld23.util.map.Map;
 import org.newdawn.slick.Color;
 
 public class Game {
 
 	private static final boolean debug = true;
-	private static final Random r = new Random();
 	private int width;
 	private int height;
-	private double d_width;
-	private double d_height;
-	private double colorFlag;
-	private boolean backgroundListRebuild = true;
-	private int backgroundList;
 	private int m_d_x;
 	private int m_d_y;
 	private Point punteroLocation = new Point(0, 0);
 	//propios
 	private Console console;
 	private Color textoNormal;
+	private Map map;
 	//recursos
 	private Texture puntero = null;
 	private Audio explosion = null;
 	private Audio salto = null;
 
-	static void debug(String string) {
+	static public void debug(String string) {
 		if (debug) {
 			System.out.println(string);
 		}
@@ -46,17 +41,10 @@ public class Game {
 	public Game(int w, int h) {
 		width = w;
 		height = h;
-
-		d_width = 7.0 / width;
-		d_height = 14.0 / height;
-
-		colorFlag = r.nextDouble();
-		System.out.println(colorFlag);
-
 		textoNormal = Color.blue;
-
 		console = new Console(100, 100, 200, 75);
 		console.addString("Test Line. All this text is the same line. The code fit this text inside the area designated to console...at least for width, will fix height later :)", textoNormal);
+		map = new Map();
 	}
 
 	public void initGL() {
@@ -71,7 +59,7 @@ public class Game {
 		glEnable(GL_TEXTURE_2D);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		Mouse.setGrabbed(true);
+//		Mouse.setGrabbed(true);
 	}
 
 	public void loadResources() {
@@ -84,28 +72,13 @@ public class Game {
 		} catch (IOException ex) {
 			Game.debug("Game::loadResources  ->  " + ex.getMessage());
 		}
+		map.loadResources();
 	}
 
 	public void render() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//		glDisable(GL_BLEND);
-		{/*code_block
-			if (backgroundListRebuild) {
-			backgroundList = glGenLists(1);
-			glNewList(backgroundList, GL_COMPILE);
-			renderBackground();
-			glEndList();
-			backgroundListRebuild = false;
-			}
-			glCallList(backgroundList);
-			//end_block*/
-
-		}
-
-		{
-			console.render();
-		}
-
+		map.render();
+//		console.render();
 		renderPuntero();
 	}
 
@@ -125,7 +98,7 @@ public class Game {
 //				if (Keyboard.getEventKey() == Keyboard.KEY_F3)
 //				if (Keyboard.getEventKey() == Keyboard.KEY_F4)
 				if (Keyboard.getEventKey() == Keyboard.KEY_F5) {
-					backgroundListRebuild = true;
+					map.nuevo();
 				}
 			}
 		}
@@ -139,28 +112,6 @@ public class Game {
 		}
 
 		punteroLocation.setLocation(Mouse.getX(), Mouse.getY());
-	}
-
-	private void renderBackground() {
-		Noise.randomize();
-		System.out.println("Creando background");
-		glBegin(GL_QUADS);
-		for (int x = 0; x < width; x++) {
-			int x2 = x + 1;
-			for (int y = 0; y < height; y++) {
-				int y2 = y + 1;
-				color(x, y);
-				glVertex2i(x, y);
-				color(x, y2);
-				glVertex2i(x, y2);
-				color(x2, y2);
-				glVertex2i(x2, y2);
-				color(x2, y);
-				glVertex2i(x2, y);
-			}
-		}
-		glEnd();
-		System.out.println("Background creado");
 	}
 
 	private void renderPuntero() {
@@ -181,15 +132,5 @@ public class Game {
 			glVertex2i(m_x + m_d_x, m_y);
 			glEnd();
 		}
-	}
-
-	private void color(int x, int y) {
-//		double red = Noise.noiseNormalizado(x * d_width, y * d_height * 0.33, 5);
-//		double green = Noise.noiseNormalizado(x * d_width, y * d_height * 0.17, 5);
-//		double blue = Noise.noiseNormalizado(x * d_width, y * d_height * 0.76, 5);
-//		double c = red * green * blue;
-//		c = Math.sqrt(Math.sqrt(c));
-		double c = Noise.noiseNormalizado(x * d_width, y * d_height, 9);
-		glColor3d(c * 0.2, c * 0.8, c * 0.2);
 	}
 }
