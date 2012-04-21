@@ -102,7 +102,7 @@ public class Game {
 				if (Keyboard.getEventKey() == Keyboard.KEY_F1)
 					explosion.playAsMusic(1, 1, false);
 				if (Keyboard.getEventKey() == Keyboard.KEY_F2)
-					salto.playAsMusic(1, 1, false);
+					salto.playAsSoundEffect(1, 1, false);
 //				if (Keyboard.getEventKey() == Keyboard.KEY_F3)
 //				if (Keyboard.getEventKey() == Keyboard.KEY_F4)
 				if (Keyboard.getEventKey() == Keyboard.KEY_F5) {
