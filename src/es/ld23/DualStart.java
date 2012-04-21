@@ -8,6 +8,7 @@ import java.applet.Applet;
 import java.awt.BorderLayout;
 import java.awt.Canvas;
 import org.lwjgl.LWJGLException;
+import org.lwjgl.Sys;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.openal.AL;
 import org.lwjgl.opengl.Display;
@@ -29,6 +30,7 @@ public class DualStart extends Applet {
 	private static boolean running = false;
 	private static int w = 800;
 	private static int h = 600;
+	private static long lastFrame;
 
 	/**
 	 * Method to create new thread and set lwjgl environment for applet.
@@ -75,8 +77,9 @@ public class DualStart extends Applet {
 	 * Applet handle close by Cavas.Notify, but application need to check closeRequested.
 	 */
 	private static void gameLoop() {
+		getDelta();
 		while (running) {
-			game.tick();
+			game.tick(getDelta());
 			game.render();
 			Display.sync(60);
 			Display.update();
@@ -140,5 +143,12 @@ public class DualStart extends Applet {
 		}
 		Mouse.setGrabbed(true);
 		gameLoop();
+	}
+
+	public static long getDelta() {
+		long time = Sys.getTime() * 1000 / Sys.getTimerResolution();
+		long delta = time - lastFrame;
+		lastFrame = time;
+		return delta;
 	}
 }

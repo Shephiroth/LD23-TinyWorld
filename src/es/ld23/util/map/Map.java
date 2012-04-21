@@ -1,12 +1,14 @@
 package es.ld23.util.map;
 
+import java.util.ArrayList;
 import java.util.Random;
-import org.newdawn.slick.Color;
 import java.awt.image.BufferedImage;
 import es.ld23.Game;
+import es.ld23.util.BBRectangle;
 import es.ld23.util.Noise;
 import java.io.IOException;
 import javax.imageio.ImageIO;
+import org.newdawn.slick.Color;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 import org.newdawn.slick.util.ResourceLoader;
@@ -24,6 +26,7 @@ public class Map {
 	private Tile tiles[];
 	private boolean listRebuild = true;
 	private int list;
+	private ArrayList<BBRectangle> boundingbox = new ArrayList<BBRectangle>();
 
 	public Map() {
 		Noise.randomize();
@@ -168,9 +171,24 @@ public class Map {
 					if (n < Tile.FloresHierva.length) {
 						int pos = r.nextBoolean() ? 1 : 0;
 						setTile(f, c, Tile.FloresHierva[n][pos]);
+						createBB(f,c);
 					}
 				}
 			}
 		}
+	}
+
+	public boolean isFree(BBRectangle playerBB) {
+		if (!boundingbox.isEmpty()) {
+			for (BBRectangle aux : boundingbox) {
+				if (playerBB.collision(aux))
+					return false;
+			}
+		}
+		return true;
+	}
+
+	private void createBB(int f, int c) {
+		boundingbox.add(new BBRectangle(c*Tile.tile_width, f*Tile.tile_height,Tile.tile_width, Tile.tile_height));
 	}
 }
