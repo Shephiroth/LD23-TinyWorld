@@ -22,7 +22,7 @@ import org.lwjgl.opengl.DisplayMode;
  */
 public class DualStart extends Applet {
 
-	private static  Canvas father = null;
+	private static Canvas father = null;
 	private static Thread hilo = null;
 	private static Game game = null;
 	private static boolean running = false;
@@ -44,6 +44,7 @@ public class DualStart extends Applet {
 						Display.setParent(father);
 					}
 					Display.create();
+					game = new Game(w, h);
 					game.initGL();
 					game.loadResources();
 				} catch (LWJGLException e) {
@@ -110,7 +111,6 @@ public class DualStart extends Applet {
 				}
 			};
 			father.setSize(w, h);
-			game = new Game(w, h);
 			add(father);
 			father.setFocusable(true);
 			father.requestFocus();
