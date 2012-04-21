@@ -2,12 +2,10 @@ package es.ld23.util.map;
 
 import java.util.ArrayList;
 import java.util.Random;
-import java.awt.image.BufferedImage;
 import es.ld23.Game;
 import es.ld23.util.BBRectangle;
 import es.ld23.util.Noise;
 import java.io.IOException;
-import javax.imageio.ImageIO;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;

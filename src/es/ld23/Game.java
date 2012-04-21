@@ -1,5 +1,7 @@
 package es.ld23;
 
+import es.ld23.util.map.PC;
+import java.util.ArrayList;
 import es.ld23.util.BBRectangle;
 import es.ld23.util.map.Player;
 import es.ld23.util.Console;
@@ -31,10 +33,19 @@ public class Game {
 	private Color textoNormal;
 	private Map map;
 	private Player player;
+	private ArrayList<PC> mobs = new ArrayList<PC>();
 	//recursos
 	private Texture puntero = null;
+	private Texture mob_texture = null;
 	private Audio explosion = null;
 	private Audio salto = null;
+
+	static public void textureInfo(Texture target) {
+		System.out.println("Texture info: " + target.getTextureRef());
+		System.out.println("ID=" + target.getTextureID() + ". Alpha? " + target.hasAlpha());
+		System.out.println("ImgHeight=" + target.getImageHeight() + ". TextureHeight=" + target.getTextureHeight() + ". Height=" + target.getHeight());
+		System.out.println("ImgWidth=" + target.getImageWidth() + ". TextureWidth=" + target.getTextureWidth() + ". Width=" + target.getWidth());
+	}
 
 	static public void debug(String string) {
 		if (debug) {
@@ -72,6 +83,8 @@ public class Game {
 			puntero = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/puntero_red.png"));
 			m_d_x = (int) (puntero.getTextureWidth() * 0.7);
 			m_d_y = (int) (puntero.getTextureHeight() * 0.7);
+			mob_texture = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/mobs.png"));
+			Game.textureInfo(mob_texture);
 			explosion = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/Explosion.wav"));
 			salto = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/Jump.wav"));
 		} catch (IOException ex) {
@@ -83,15 +96,33 @@ public class Game {
 	public void render() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glLoadIdentity();
-		glTranslated(player.getCameraX(width, map.getWidth()),player.getCameraY(height, map.getHeight()),0);
+		glTranslated(player.getCameraX(width, map.getWidth()), player.getCameraY(height, map.getHeight()), 0);
 		map.render();
-		player.render();
+		renderMobs();
 		glLoadIdentity();
 //		console.render();
 		renderPuntero();
 	}
 
+	private void renderMobs() {
+		glEnable(GL_TEXTURE_2D);
+		glEnable(GL_BLEND);
+		Color.white.bind();
+		mob_texture.bind();
+		glBegin(GL_QUADS);
+		if (!mobs.isEmpty()) {
+			for (PC mob : mobs) {
+				mob.render();
+			}
+		}
+		player.render();
+		glEnd();
+	}
+
 	public void tick(long delta) {
+		if (delta == 0) {
+			return;
+		}
 
 		boolean izq = Keyboard.isKeyDown(Keyboard.KEY_A) || Keyboard.isKeyDown(Keyboard.KEY_LEFT);
 		boolean der = Keyboard.isKeyDown(Keyboard.KEY_D) || Keyboard.isKeyDown(Keyboard.KEY_RIGHT);
@@ -140,9 +171,14 @@ public class Game {
 			if (!map.isFree(playerbb)) {
 				dy = 0;
 			}
+			player.tick(delta);
+			player.setTecladoState(izq, arr, der, aba);
 		}
 		if (dx != 0 || dy != 0) {
 			player.move(dx, dy);
+		}
+		for (PC mob : mobs) {
+			mob.tick(delta);
 		}
 
 

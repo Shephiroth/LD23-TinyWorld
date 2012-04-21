@@ -44,6 +44,10 @@ public class BBRectangle {
 		top += dy;
 	}
 
+	public void moveTo(double x, double y) {
+		left = x;
+		top = y;
+	}
 	public BBRectangle createMoved(double dx, double dy) {
 		return new BBRectangle(left + dx, top + dy, width, height);
 	}
@@ -63,4 +67,5 @@ public class BBRectangle {
 	public void render() {
 		render(Color.red);
 	}
+
 }
