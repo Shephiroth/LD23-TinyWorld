@@ -2,8 +2,11 @@ package es.ld23.util.map;
 
 import es.ld23.util.BBRectangle;
 import static org.lwjgl.opengl.GL11.*;
+import org.newdawn.slick.Color;
+import org.newdawn.slick.TrueTypeFont;
 
 public abstract class PC {
+
 	public static final int PC_MOVE_ABA = 0;
 	public static final int PC_MOVE_IZQ = 1;
 	public static final int PC_MOVE_DER = 2;
@@ -61,5 +64,8 @@ public abstract class PC {
 	}
 
 	public void tick(long delta) {
+	}
+
+	public void renderText(TrueTypeFont font, Color color) {
 	}
 }

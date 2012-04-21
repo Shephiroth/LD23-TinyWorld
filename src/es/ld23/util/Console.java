@@ -1,6 +1,5 @@
 package es.ld23.util;
 
-import java.awt.Font;
 import java.util.ArrayList;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.TrueTypeFont;
@@ -8,7 +7,8 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class Console {
 
-	private final TrueTypeFont font;
+	private TrueTypeFont font;
+
 
 	public class ConsoleLine {
 
@@ -33,9 +33,9 @@ public class Console {
 		this.height = h;
 
 		lineas = new ArrayList<ConsoleLine>();
-
-		Font awtFont = new Font("Times New Roman", Font.BOLD, 14);
-		font = new TrueTypeFont(awtFont, true);
+	}
+	public void setFont(TrueTypeFont font) {
+		this.font = font;
 	}
 
 	public void render() {

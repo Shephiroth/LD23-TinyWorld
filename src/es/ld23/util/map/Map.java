@@ -1,7 +1,6 @@
 package es.ld23.util.map;
 
 import java.util.ArrayList;
-import java.util.Random;
 import es.ld23.Game;
 import es.ld23.util.BBRectangle;
 import es.ld23.util.Noise;
@@ -14,7 +13,6 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class Map {
 
-	private static final Random r = new Random();
 	private int map_f = 30;
 	private int map_c = 30;
 	private Texture textureTiles;
@@ -78,11 +76,12 @@ public class Map {
 
 	public final void nuevo() {
 		listRebuild = true;
+		boundingbox.clear();
 		tiles = new Tile[map_f * map_c];
 		map_w = Tile.tile_width * map_c;
 		map_h = Tile.tile_height * map_f;
 		mapBB = new BBRectangle(0, 0, map_w, map_h);
-		Tile water = Tile.Mar[r.nextInt(Tile.Mar.length)];
+		Tile water = Tile.Mar[Game.random.nextInt(Tile.Mar.length)];
 		Tile.setWaterLayer(water);
 		for (int f = 0; f < map_f; f++) {
 			double n_f = f * 37.5 / map_w;
@@ -151,9 +150,9 @@ public class Map {
 		for (int f = 0; f < map_f; f++) {
 			for (int c = 0; c < map_c; c++) {
 				if (getTile(f, c) == Tile.MarHierva[4]) {
-					int n = r.nextInt(500);
+					int n = Game.random.nextInt(500);
 					if (n < Tile.FloresHierva.length) {
-						int pos = r.nextBoolean() ? 1 : 0;
+						int pos = Game.random.nextBoolean() ? 1 : 0;
 						setTile(f, c, Tile.FloresHierva[n][pos]);
 						createBB(f, c);
 					}

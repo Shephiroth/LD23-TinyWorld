@@ -1,5 +1,6 @@
 package es.ld23.util;
 
+import es.ld23.Game;
 import java.util.Random;
 
 public class Noise {
@@ -38,9 +39,8 @@ public class Noise {
 	}
 
 	public static void randomize() {
-		Random r = new Random();
 		for (int i = 0; i < p.length; i++) {
-			p[i] = (short) r.nextInt(256);
+			p[i] = (short) Game.random.nextInt(256);
 		}
 		for (int i = 0; i < 512; i++) {
 			perm[i] = p[i & 255];
@@ -49,9 +49,8 @@ public class Noise {
 	}
 
 	public static void randomize(long seed) {
-		Random r = new Random(seed);
 		for (int i = 0; i < p.length; i++) {
-			p[i] = (short) r.nextInt(256);
+			p[i] = (short) Game.random.nextInt(256);
 		}
 		for (int i = 0; i < 512; i++) {
 			perm[i] = p[i & 255];

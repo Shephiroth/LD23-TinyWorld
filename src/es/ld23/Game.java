@@ -1,12 +1,16 @@
 package es.ld23;
 
+import es.ld23.util.map.Zombie;
+import org.newdawn.slick.TrueTypeFont;
+import java.awt.Font;
+import java.util.Random;
 import es.ld23.util.map.PC;
-import java.util.ArrayList;
 import es.ld23.util.BBRectangle;
 import es.ld23.util.map.Player;
 import es.ld23.util.Console;
 import es.ld23.util.map.Map;
 import java.io.IOException;
+import java.util.ArrayList;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.util.Point;
@@ -20,6 +24,7 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class Game {
 
+	public static final Random random = new Random();
 	private static final double walk_speed = 0.27;
 	private static final double diagonal_change = Math.sqrt(0.5);
 	private static final boolean debug = true;
@@ -33,8 +38,9 @@ public class Game {
 	private Color textoNormal;
 	private Map map;
 	private Player player;
-	private ArrayList<PC> mobs = new ArrayList<PC>();
+	private ArrayList<PC> mobs;
 	//recursos
+	private TrueTypeFont font;
 	private Texture puntero = null;
 	private Texture mob_texture = null;
 	private Audio explosion = null;
@@ -56,11 +62,18 @@ public class Game {
 	public Game(int w, int h) {
 		width = w;
 		height = h;
+		Font awtFont = new Font("Times New Roman", Font.BOLD, 14);
+		font = new TrueTypeFont(awtFont, true);
 		textoNormal = Color.blue;
 		console = new Console(100, 100, 200, 75);
+		console.setFont(font);
 		console.addString("Test Line. All this text is the same line. The code fit this text inside the area designated to console...at least for width, will fix height later :)", textoNormal);
 		map = new Map();
 		player = new Player();
+		mobs = new ArrayList<PC>();
+		for (int i = 0; i < 400; i++) {
+			mobs.add(new Zombie(map.getWidth(), map.getHeight()));
+		}
 	}
 
 	public void initGL() {
@@ -84,7 +97,6 @@ public class Game {
 			m_d_x = (int) (puntero.getTextureWidth() * 0.7);
 			m_d_y = (int) (puntero.getTextureHeight() * 0.7);
 			mob_texture = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/mobs.png"));
-			Game.textureInfo(mob_texture);
 			explosion = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/Explosion.wav"));
 			salto = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/Jump.wav"));
 		} catch (IOException ex) {
@@ -117,6 +129,12 @@ public class Game {
 		}
 		player.render();
 		glEnd();
+		if (!mobs.isEmpty()) {
+			glDisable(GL_TEXTURE_2D);
+			for (PC mob : mobs) {
+				mob.renderText(font, Color.white);
+			}
+		}
 	}
 
 	public void tick(long delta) {
@@ -164,11 +182,11 @@ public class Game {
 
 		if (dx != 0 || dy != 0) {
 			BBRectangle playerbb = player.getBB().createMoved(dx, 0);
-			if (!map.isFree(playerbb)) {
+			if (!checkBB(playerbb)) {
 				dx = 0;
 			}
 			playerbb = player.getBB().createMoved(dx, dy);
-			if (!map.isFree(playerbb)) {
+			if (!checkBB(playerbb)) {
 				dy = 0;
 			}
 			player.tick(delta);
@@ -195,7 +213,11 @@ public class Game {
 					salto.playAsSoundEffect(1, 1, false);
 				}
 				if (Keyboard.getEventKey() == Keyboard.KEY_F5) {
+					mobs.clear();
 					map.nuevo();
+					for (int i = 0; i < 400; i++) {
+						mobs.add(new Zombie(map.getWidth(), map.getHeight()));
+					}
 				}
 			}
 		}
@@ -230,5 +252,20 @@ public class Game {
 			glVertex2i(m_x + m_d_x, m_y);
 			glEnd();
 		}
+	}
+
+	private boolean checkBB(BBRectangle playerbb) {
+		if (!map.isFree(playerbb)) {
+			return false;
+		}
+		if (!mobs.isEmpty()) {
+			for (PC mob : mobs) {
+				if (mob.getBB().collision(playerbb)) {
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 }
