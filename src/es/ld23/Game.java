@@ -1,8 +1,14 @@
 package es.ld23;
 
+import org.lwjgl.util.Point;
+import java.io.IOException;
+import org.newdawn.slick.opengl.Texture;
 import es.ld23.util.Noise;
 import java.util.Random;
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
+import org.newdawn.slick.opengl.TextureLoader;
+import org.newdawn.slick.util.ResourceLoader;
 import static org.lwjgl.opengl.GL11.*;
 
 public class Game {
@@ -13,9 +19,15 @@ public class Game {
 	private int height;
 	private double d_width;
 	private double d_height;
-	private boolean backgroundListRebuild = true;
 	private double colorFlag;
+	//background list
+	private boolean backgroundListRebuild = true;
 	private int backgroundList;
+	//puntero list
+	private Texture puntero = null;
+	private int m_d_x;
+	private int m_d_y;
+	private Point punteroLocation = new Point(0, 0);
 
 	static void debug(String string) {
 		if (debug) {
@@ -42,12 +54,26 @@ public class Game {
 		glLoadIdentity();
 		glOrtho(0, width, height, 0, 1, -1);
 		glMatrixMode(GL_MODELVIEW);
+
+		glEnable(GL_TEXTURE_2D);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		
+		Mouse.setGrabbed(true);
 	}
 
 	public void loadResources() {
+		try {
+			puntero = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/puntero_red.png"));
+			m_d_x = (int) (puntero.getTextureWidth() * 0.7);
+			m_d_y = (int) (puntero.getTextureHeight() * 0.7);
+		} catch (IOException ex) {
+			Game.debug("Game::loadResources  ->  " + ex.getMessage());
+		}
 	}
 
 	public void render() {
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glDisable(GL_BLEND);
 		if (backgroundListRebuild) {
 			backgroundList = glGenLists(1);
 			glNewList(backgroundList, GL_COMPILE);
@@ -56,14 +82,32 @@ public class Game {
 			backgroundListRebuild = false;
 		}
 		glCallList(backgroundList);
+		glEnable(GL_BLEND);
+		renderPuntero();
 	}
 
 	public void tick() {
 		while (Keyboard.next()) {
-			if (Keyboard.getEventKeyState() && Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
-				backgroundListRebuild=true;
+			if (Keyboard.getEventKeyState()) {
+				if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
+					Mouse.setGrabbed(false);
+					Mouse.setCursorPosition(punteroLocation.getX(), punteroLocation.getY());
+				}
+				if (Keyboard.getEventKey() == Keyboard.KEY_F5) {
+					backgroundListRebuild = true;
+				}
 			}
 		}
+
+		while (Mouse.next()) {
+			if (Mouse.getEventButtonState()) {
+				if (!Mouse.isGrabbed()) {
+					Mouse.setGrabbed(true);
+				}
+			}
+		}
+
+		punteroLocation.setLocation(Mouse.getX(), Mouse.getY());
 	}
 
 	private void renderBackground() {
@@ -88,12 +132,35 @@ public class Game {
 		System.out.println("Background creado");
 	}
 
+	private void renderPuntero() {
+
+		if (Mouse.isGrabbed()) {
+
+			int m_x = punteroLocation.getX();
+			int m_y = height - punteroLocation.getY();
+			glEnable(GL_TEXTURE_2D);
+			glColor3d(1, 1, 1);
+			puntero.bind();
+			glBegin(GL_QUADS);
+			glTexCoord2d(0, 0);
+			glVertex2i(m_x, m_y);
+			glTexCoord2d(0, 1);
+			glVertex2i(m_x, m_y + m_d_y);
+			glTexCoord2d(1, 1);
+			glVertex2i(m_x + m_d_x, m_y + m_d_y);
+			glTexCoord2d(1, 0);
+			glVertex2i(m_x + m_d_x, m_y);
+			glEnd();
+		}
+	}
+
 	private void color(int x, int y) {
-		double red = Noise.noiseNormalizado(x * d_width, y * d_height * 0.33, 5);
-		double green = Noise.noiseNormalizado(x * d_width, y * d_height * 0.17, 5);
-		double blue = Noise.noiseNormalizado(x * d_width, y * d_height * 0.76, 5);
-		double c = red*green*blue;
-		c = Math.sqrt(Math.sqrt(c));
-		glColor3d(c*0.2,c*0.8,c*0.2);
+//		double red = Noise.noiseNormalizado(x * d_width, y * d_height * 0.33, 5);
+//		double green = Noise.noiseNormalizado(x * d_width, y * d_height * 0.17, 5);
+//		double blue = Noise.noiseNormalizado(x * d_width, y * d_height * 0.76, 5);
+//		double c = red * green * blue;
+//		c = Math.sqrt(Math.sqrt(c));
+		double c = Noise.noiseNormalizado(x * d_width, y * d_height, 9);
+		glColor3d(c * 0.2, c * 0.8, c * 0.2);
 	}
 }
