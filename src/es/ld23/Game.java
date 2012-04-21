@@ -1,5 +1,6 @@
 package es.ld23;
 
+import org.newdawn.slick.openal.Audio;
 import org.lwjgl.util.Point;
 import java.io.IOException;
 import org.newdawn.slick.opengl.Texture;
@@ -7,6 +8,7 @@ import es.ld23.util.Noise;
 import java.util.Random;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
+import org.newdawn.slick.openal.AudioLoader;
 import org.newdawn.slick.opengl.TextureLoader;
 import org.newdawn.slick.util.ResourceLoader;
 import static org.lwjgl.opengl.GL11.*;
@@ -20,14 +22,16 @@ public class Game {
 	private double d_width;
 	private double d_height;
 	private double colorFlag;
-	//background list
 	private boolean backgroundListRebuild = true;
 	private int backgroundList;
-	//puntero list
-	private Texture puntero = null;
 	private int m_d_x;
 	private int m_d_y;
 	private Point punteroLocation = new Point(0, 0);
+	
+	//recursos
+	private Texture puntero = null;
+	private Audio explosion = null;
+	private Audio salto = null;
 
 	static void debug(String string) {
 		if (debug) {
@@ -66,6 +70,8 @@ public class Game {
 			puntero = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/puntero_red.png"));
 			m_d_x = (int) (puntero.getTextureWidth() * 0.7);
 			m_d_y = (int) (puntero.getTextureHeight() * 0.7);
+			explosion = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/Explosion.wav"));
+			salto = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/Jump.wav"));
 		} catch (IOException ex) {
 			Game.debug("Game::loadResources  ->  " + ex.getMessage());
 		}
@@ -93,6 +99,12 @@ public class Game {
 					Mouse.setGrabbed(false);
 					Mouse.setCursorPosition(punteroLocation.getX(), punteroLocation.getY());
 				}
+				if (Keyboard.getEventKey() == Keyboard.KEY_F1)
+					explosion.playAsMusic(1, 1, false);
+				if (Keyboard.getEventKey() == Keyboard.KEY_F2)
+					salto.playAsMusic(1, 1, false);
+//				if (Keyboard.getEventKey() == Keyboard.KEY_F3)
+//				if (Keyboard.getEventKey() == Keyboard.KEY_F4)
 				if (Keyboard.getEventKey() == Keyboard.KEY_F5) {
 					backgroundListRebuild = true;
 				}

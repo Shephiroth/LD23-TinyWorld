@@ -8,6 +8,7 @@ import java.applet.Applet;
 import java.awt.BorderLayout;
 import java.awt.Canvas;
 import org.lwjgl.LWJGLException;
+import org.lwjgl.openal.AL;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 
@@ -82,6 +83,7 @@ public class DualStart extends Applet {
 			}
 		}
 		Display.destroy();
+		AL.destroy();
 	}
 
 	/**
