@@ -1,5 +1,7 @@
 package es.ld23.util.map;
 
+import es.ld23.equipment.Armor;
+import es.ld23.equipment.Arrow;
 import es.ld23.equipment.Bullet;
 import es.ld23.equipment.Weapon;
 import es.ld23.util.BBRectangle;
@@ -8,6 +10,8 @@ public class Player extends PC {
 
 	private int nivel;
 	private Weapon arma;
+	private Arrow arrow;
+	private Armor armor;
 	private double hp;
 	private int exp;
 	private int score;
@@ -22,6 +26,8 @@ public class Player extends PC {
 		walk_frame = 0;
 		walk_direction = PC.PC_MOVE_DER;
 		this.arma = Weapon.bow;
+		this.arrow = Arrow.Default;
+		this.armor = Armor.Default;
 		this.score = 0;
 		this.hp = 10;
 	}
@@ -34,6 +40,7 @@ public class Player extends PC {
 			nivel++;
 		}
 	}
+
 	public final void start() {
 		left = 0;
 		top = 0;
@@ -60,9 +67,23 @@ public class Player extends PC {
 		return arma;
 	}
 
+	public Arrow getArrow() {
+		return arrow;
+	}
+
+	public Armor getArmor() {
+		return armor;
+	}
+
 	public void setWeapon(Weapon nueva) {
 		if (nueva != null) {
 			arma = nueva;
+		}
+	}
+
+	public void setArrow(Arrow arrow) {
+		if (arrow != null) {
+			this.arrow = arrow;
 		}
 	}
 
@@ -131,4 +152,14 @@ public class Player extends PC {
 		return gold;
 	}
 
+	public int getNivel() {
+		return nivel;
+	}
+
+	public double getDmg() {
+		return arma.getDmg() + arrow.getDmg();
+	}
+	public int getDefense() {
+		return armor.getDefense();
+	}
 }

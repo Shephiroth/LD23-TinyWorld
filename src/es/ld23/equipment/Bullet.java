@@ -118,4 +118,9 @@ public class Bullet {
 
 		return (deltaTime > 0);
 	}
+
+	public void setDmg(double dmg) {
+		if (dmg > this.dmg)
+		this.dmg = dmg;
+	}
 }

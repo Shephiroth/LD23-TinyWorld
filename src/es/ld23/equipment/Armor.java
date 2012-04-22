@@ -3,24 +3,22 @@ package es.ld23.equipment;
 import java.awt.Rectangle;
 import static org.lwjgl.opengl.GL11.*;
 
-public class Weapon {
+public class Armor {
 
-	protected double ty_top = 48.0 / 256.0;
-	public static final double dy = 24.0 / 256.0;
-	public static final double dx = 24.0 / 256.0;
-	public static final Weapon bow = new Weapon(0, true, 20, 10, 350);
-	private boolean createBullet;
-	private double dmg;
-	private int delay;
-	private int deltaTime;
-	private int weaponCol;
+	public static final Armor Default = new Armor(0, 1);
+	private static final double dy = 24.0 / 256.0;
+	private static final double dx = 24.0 / 256.0;
+	private static final double ty_top = 48.0 / 256.0 - dy;
+	private int columna;
+	private int defense;
 
-	public Weapon(int weaponCol, boolean createBullet, double dmg, int deltaTime, int delay) {
-		this.dmg = dmg;
-		this.createBullet = createBullet;
-		this.deltaTime = deltaTime * 100;
-		this.weaponCol = weaponCol;
-		this.delay = delay;
+	public Armor(int col, int defense) {
+		this.columna = col;
+		this.defense = defense;
+	}
+
+	public int getDefense() {
+		return defense;
 	}
 
 	public void render(Rectangle posicion) {
@@ -34,12 +32,11 @@ public class Weapon {
 			glVertex2d(posicion.x + posicion.width, posicion.y);
 		}
 		glEnd();
-
 		glEnable(GL_TEXTURE_2D);
 		glEnable(GL_BLEND);
 		glBegin(GL_QUADS);
 		{
-			double init = weaponCol * dx;
+			double init = columna * dx;
 			glColor3d(1, 1, 1);
 			glTexCoord2d(init, ty_top);
 			glVertex2d(posicion.x, posicion.y);
@@ -51,20 +48,5 @@ public class Weapon {
 			glVertex2d(posicion.x + posicion.width, posicion.y);
 		}
 		glEnd();
-	}
-
-	public Bullet fire() {
-		if (createBullet) {
-			return new Bullet(dmg, deltaTime);
-		}
-		return null;
-	}
-
-	public int getDelay() {
-		return delay;
-	}
-
-	public double getDmg() {
-		return dmg;
 	}
 }

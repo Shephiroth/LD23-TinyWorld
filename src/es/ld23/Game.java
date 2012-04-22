@@ -42,7 +42,9 @@ public class Game {
 	private boolean gameover;
 	//propios
 	private Rectangle menuMapOptions;
-	private Rectangle weaponRectangle;
+	private Rectangle rectWeapon;
+	private Rectangle rectArrow;
+	private Rectangle rectArmor;
 	private Console console;
 	private Color textoNormal;
 	private Map map;
@@ -50,6 +52,8 @@ public class Game {
 	private ArrayList<PC> mobs;
 	private ArrayList<Bullet> bullets;
 	private ArrayList<Bullet> bulletsEnemigas;
+	//shop
+	
 	//recursos
 	private TrueTypeFont font;
 	private TrueTypeFont bigfont;
@@ -87,7 +91,9 @@ public class Game {
 		bigfont = new TrueTypeFont(awtFont, true);
 		textoNormal = Color.green.brighter();
 		menuMapOptions = new Rectangle(85, 325, bigfont.getWidth("Map 1 : 24x24"), bigfont.getLineHeight() * 8);
-		weaponRectangle = new Rectangle(width - 50, 152, 48, 48);
+		rectWeapon = new Rectangle(width - 178, 177, 48, 48);
+		rectArrow = new Rectangle(width - 124, 177, 48, 48);
+		rectArmor = new Rectangle(width - 70, 177, 48, 48);
 		console = new Console(width - 200, 0, 200, 150);
 		console.setFont(font);
 		console.addString("Test Line. All this text is the same line. The code fit this text inside the area designated to console...at least for width, will fix height later :)", textoNormal);
@@ -243,16 +249,21 @@ public class Game {
 		glEnable(GL_BLEND);
 		int left = width - 180;
 		int right = left + font.getWidth("Score: 999999  ");
-		font.drawString(left, 205, "Score: " + player.getScore(), Color.blue);
-		font.drawString(right, 205, "Gold: " + player.getGold(), Color.blue);
-		font.drawString(left, 205 + font.getLineHeight(), "HP: " + player.getHP(), Color.blue);
-		font.drawString(right, 205 + font.getLineHeight(), "Att: " + player.getWeapon().getDmg(), Color.blue);
-		font.drawString(left, 205 + font.getLineHeight() * 2, "EXP: " + player.getExp() + "/" + player.getNextExp(), Color.blue);
-		font.drawString(right, 205 + font.getLineHeight() * 2, "Speed: " + (1000.0 / player.getWeapon().getDelay()) + "/" + player.getNextExp(), Color.blue);
-//		font.drawString(right, 205 + font.getLineHeight()*2, "Def: " + player.getDefense().getDef()+"/"+player.getNextExp(), Color.blue);
+		font.drawString(left, 255, "Nivel: " + player.getNivel(), Color.blue);
+		font.drawString(right, 255, "HP: " + player.getHP(), Color.blue);
+		font.drawString(left, 255 + font.getLineHeight(), "Score: " + player.getScore(), Color.blue);
+		font.drawString(right, 255 + font.getLineHeight(), "Gold: " + player.getGold(), Color.blue);
+		font.drawString(left, 255 + font.getLineHeight() * 2, "Att: " + player.getDmg(), Color.blue);
+		font.drawString(right, 255 + font.getLineHeight() * 2, "Speed: " + (1000.0 / player.getWeapon().getDelay()), Color.blue);
+		font.drawString(left, 255 + font.getLineHeight() * 3, "EXP: " + (player.getNextExp() - player.getExp()), Color.blue);
+		font.drawString(right, 255 + font.getLineHeight() * 3, "Def: " + player.getDefense(), Color.blue);
 		console.render();
 		textureItems.bind();
-		player.getWeapon().render(weaponRectangle);
+		player.getWeapon().render(rectWeapon);
+		player.getArrow().render(rectArrow);
+		if (player.getArmor() != null) {
+			player.getArmor().render(rectArmor);
+		}
 		renderPuntero();
 	}
 
@@ -275,11 +286,9 @@ public class Game {
 					} else {
 						int x = Mouse.getEventX();
 						int y = height - Mouse.getEventY();
-						System.out.println("X=" + x + " Y=" + y);
 						if (menuMapOptions.contains(x, y)) {
 							y -= menuMapOptions.y;
 							int p = (int) (y / (bigfont.getLineHeight() * 1.5));
-							System.out.println("Y=" + y + " H=" + bigfont.getLineHeight() * 2 + " P=" + p);
 							switch (p) {
 								case 0:
 									console.addString("You clicked 24x24", textoNormal);
@@ -402,6 +411,7 @@ public class Game {
 			if (arma != null) {
 				Bullet b = player.fire();
 				if (b != null) {
+					b.setDmg(player.getDmg());
 					b.setLocation(player.getX(), player.getY());
 					b.setDirection(playerDir);
 					bullets.add(b);
@@ -424,6 +434,7 @@ public class Game {
 							if (mob.getBB().collision(bullet.getBB())) {
 								if (mob.hurt(bullet.getDmg())) {
 									mobs.remove(m);
+									console.addString(mob.getScore() + " exp points.", textoNormal);
 									player.addScore(mob.getScore());
 								}
 								bullets.remove(b);
@@ -460,6 +471,7 @@ public class Game {
 							gameoverDelay = 2000;
 							explosion.playAsSoundEffect(1, 1, false);
 						} else {
+							console.addString(bullet.getDmg() + " dmg points.", textoNormal);
 							damage.playAsSoundEffect(1, 1, false);
 						}
 						bulletsEnemigas.remove(b);
