@@ -8,8 +8,8 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class Map {
 
-	private int map_f = 30;
-	private int map_c = 30;
+	private int map_f = 20;
+	private int map_c = 20;
 	private Tile tiles[];
 	private boolean listRebuild = true;
 	private int list;

@@ -46,7 +46,6 @@ public class Console {
 	}
 
 	public void render() {
-		glDisable(GL_TEXTURE_2D);
 		int l_h = font.getLineHeight();
 		int filas = 0;
 		for (ConsoleLine cl : lineas) {

@@ -46,6 +46,7 @@ public class Game {
 	private Player player;
 	private ArrayList<PC> mobs;
 	private ArrayList<Bullet> bullets;
+	private int bulletDelay;
 	//recursos
 	private TrueTypeFont font;
 	private Texture puntero;
@@ -84,7 +85,8 @@ public class Game {
 		player = new Player();
 		mobs = new ArrayList<PC>();
 		bullets = new ArrayList<Bullet>();
-		for (int i = 0; i < 40; i++) {
+		bulletDelay = 0;
+		for (int i = 0; i < 20; i++) {
 			mobs.add(new Zombie(map.getWidth(), map.getHeight()));
 		}
 	}
@@ -167,6 +169,7 @@ public class Game {
 			}
 		}
 		glEnd();
+		glColor3d(1, 1, 1);
 	}
 
 	private void renderPuntero() {
@@ -202,15 +205,19 @@ public class Game {
 		glCallList(list);
 		glDisable(GL_TEXTURE_2D);
 		glEnable(GL_BLEND);
+		font.drawString(width - 200, 205, "Score: " + player.getScore(), Color.blue);
 		console.render();
 		textureItems.bind();
-		Weapon.bow.render(weaponRectangle);
+		player.getWeapon().render(weaponRectangle);
 		renderPuntero();
 	}
 
 	public void tick(long delta) {
 		if (delta == 0) {
 			return;
+		}
+		if (bulletDelay > 0) {
+			bulletDelay -= delta;
 		}
 
 		boolean izq = Keyboard.isKeyDown(Keyboard.KEY_A) || Keyboard.isKeyDown(Keyboard.KEY_LEFT);
@@ -287,25 +294,29 @@ public class Game {
 			BBRectangle mapBB = map.getBB();
 			for (int b = 0; b < bullets.size(); b++) {
 				Bullet bullet = bullets.get(b);
-				bullet.tick(delta);
-				if (!mapBB.isInside(bullet.getBB())) {
-					bullets.remove(b);
-					b--;
-					console.addString("Bullet gone.", textoNormal);
-				}
-				if (!mobs.isEmpty()) {
-					for (int m = 0; m < mobs.size(); m++) {
-						PC mob = mobs.get(m);
-						if (mob.getBB().collision(bullet.getBB())) {
-							if (mob.hurt(bullet.getDmg())) {
-								mobs.remove(m);
+				if (bullet.tick(delta)) {
+					if (!mapBB.isInside(bullet.getBB())) {
+						bullets.remove(b);
+						b--;
+					}
+					if (!mobs.isEmpty()) {
+						for (int m = 0; m < mobs.size(); m++) {
+							PC mob = mobs.get(m);
+							if (mob.getBB().collision(bullet.getBB())) {
+								if (mob.hurt(bullet.getDmg())) {
+									mobs.remove(m);
+									player.addScore(mob.getScore());
+								}
+								bullets.remove(b);
+								b--;
+								m = mobs.size();
+								impacto.playAsSoundEffect(1, 1, false);
 							}
-							bullets.remove(b);
-							b--;
-							m = mobs.size();
-							impacto.playAsSoundEffect(1, 1, false);
 						}
 					}
+				} else {
+					bullets.remove(b);
+					b--;
 				}
 			}
 		}
@@ -317,10 +328,10 @@ public class Game {
 					Mouse.setGrabbed(false);
 					Mouse.setCursorPosition(punteroLocation.getX(), punteroLocation.getY());
 				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_SPACE ||
-					Keyboard.getEventKey() == Keyboard.KEY_LCONTROL) {
+				if (Keyboard.getEventKey() == Keyboard.KEY_SPACE
+					|| Keyboard.getEventKey() == Keyboard.KEY_LCONTROL) {
 					Weapon arma = player.getWeapon();
-					if (arma != null) {
+					if (arma != null && bulletDelay <= 0) {
 						Bullet b = arma.fire();
 						if (b != null) {
 							b.setLocation(player.getX(), player.getY());
@@ -328,6 +339,7 @@ public class Game {
 							bullets.add(b);
 							disparo.playAsSoundEffect(1, 0.8f, false);
 						}
+						bulletDelay = arma.getDelay();
 					}
 				}
 				if (Keyboard.getEventKey() == Keyboard.KEY_F1) {

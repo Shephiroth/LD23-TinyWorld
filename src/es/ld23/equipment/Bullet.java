@@ -7,19 +7,21 @@ import static org.lwjgl.opengl.GL11.*;
 public class Bullet {
 
 	private static final int l = 48;
-	protected static final double dx = Weapon.dx;
-	protected static final double dy = Weapon.dy;
-	protected double x, y;
-	protected double tx, ty;
-	protected double mx, my;
-	protected int frameDir;
-	protected BBRectangle BB;
-	protected double dmg;
+	private static final double dx = Weapon.dx;
+	private static final double dy = Weapon.dy;
+	private double x, y;
+	private double tx, ty;
+	private double mx, my;
+	private int frameDir;
+	private BBRectangle BB;
+	private int deltaTime;
+	private double dmg;
 
-	public Bullet(double dmg) {
+	public Bullet(double dmg, int deltaTime) {
 		this.x = 0;
 		this.y = 0;
 		this.dmg = dmg;
+		this.deltaTime = deltaTime;
 		BB = new BBRectangle(0, 0, 24, 24);
 		tx = 0;
 		ty = dy * 4;
@@ -88,6 +90,7 @@ public class Bullet {
 	}
 
 	public void render() {
+//		glColor3d(1,0,0);
 		double ntx = tx + dx * frameDir;
 
 		glTexCoord2d(ntx, ty);
@@ -100,12 +103,15 @@ public class Bullet {
 		glVertex2d(x + l, y);
 	}
 
-	public void tick(long delta) {
+	public boolean tick(long delta) {
+		deltaTime -= delta;
 		double nx = mx * delta;
 		double ny = my * delta;
 
 		x += nx;
 		y += ny;
 		BB.move(nx, ny);
+		
+		return (deltaTime > 0);
 	}
 }

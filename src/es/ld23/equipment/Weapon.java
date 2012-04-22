@@ -8,17 +8,19 @@ public class Weapon {
 	private static final double ty_top = 48.0 / 256.0;
 	public static final double dy = 24.0 / 256.0;
 	public static final double dx = 24.0 / 256.0;
-	public static final Weapon bow = new Weapon(0, true, 10, 10);
+	public static final Weapon bow = new Weapon(0, true, 20,10,350);
 	private boolean createBullet;
 	private double dmg;
-	private double range;
+	private int delay;
+	private int deltaTime;
 	private int weaponCol;
 
-	public Weapon(int weaponCol, boolean createBullet, double dmg, double range) {
+	public Weapon(int weaponCol, boolean createBullet, double dmg, int deltaTime, int delay) {
 		this.dmg = dmg;
 		this.createBullet = createBullet;
-		this.range = range;
+		this.deltaTime = deltaTime*100;
 		this.weaponCol = weaponCol;
+		this.delay = delay;
 	}
 
 	public void render(Rectangle posicion) {
@@ -52,8 +54,9 @@ public class Weapon {
 
 	public Bullet fire() {
 		if (createBullet) {
-			return new Bullet(dmg);
+			return new Bullet(dmg, deltaTime);
 		}
 		return null;
 	}
+	public int getDelay() {return delay;}
 }

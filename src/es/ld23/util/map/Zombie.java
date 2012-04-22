@@ -61,12 +61,16 @@ public class Zombie extends PC {
 		}
 	}
 
+	public int getScore() {
+		return nivel * 75;
+	}
 
 	@Override
 	public boolean hurt(double dmg) {
 		hp -= dmg;
-		return (hp<=0);
+		return (hp <= 0);
 	}
+
 	private void generaDireccion() {
 		int dir = Game.random.nextInt(8);
 		double recto = PC.walk_speed;

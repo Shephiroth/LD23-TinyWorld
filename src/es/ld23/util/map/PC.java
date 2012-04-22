@@ -102,4 +102,8 @@ public abstract class PC {
 
 	public void renderText(TrueTypeFont font, Color color) {
 	}
+
+	public int getScore() {
+		return 0;
+	}
 }

@@ -7,17 +7,28 @@ import static org.lwjgl.opengl.GL11.*;
 public class Player extends PC {
 
 	private Weapon arma;
+	private int score;
 
 	public Player() {
-		this.left = 0;
-		this.top = 0;
+		left = 0;
+		top = 0;
 		BB = new BBRectangle(5, 5, Tile.tile_width - 10, Tile.tile_height - 10);
-		this.setTextureFil(0, 16);
-		this.setTextureCol(0, 16);
+		setTextureFil(0, 16);
+		setTextureCol(0, 16);
+		walk_frame = 0;
+		walk_direction = PC.PC_MOVE_DER;
 
-		arma = Weapon.bow;
-		this.walk_frame = 0;
-		this.walk_direction = PC.PC_MOVE_DER;
+
+		this.arma = Weapon.bow;
+		this.score = 0;
+	}
+
+	public void addScore(int puntos) {
+		score += puntos;
+	}
+
+	public int getScore() {
+		return score;
 	}
 
 	public Weapon getWeapon() {
