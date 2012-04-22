@@ -58,6 +58,7 @@ public class Player extends PC {
 	}
 
 	public double getCameraY(int height, int h) {
+		if (height > h) return (height-h)/2;
 		double half = (height - Tile.tile_height) / 2.0;
 		double max = h - height + half;
 		double res = top - half;
@@ -71,6 +72,7 @@ public class Player extends PC {
 	}
 
 	public double getCameraX(int width, int w) {
+		if (width > w) return (width-w)/2;
 		double half = (width - Tile.tile_width) / 2.0;
 		double max = w - width + half;
 		double res = left - half;

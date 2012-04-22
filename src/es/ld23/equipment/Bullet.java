@@ -22,7 +22,7 @@ public class Bullet {
 		this.y = 0;
 		this.dmg = dmg;
 		this.deltaTime = deltaTime;
-		BB = new BBRectangle(0, 0, 24, 24);
+		BB = new BBRectangle(6, 6, 12, 12);
 		tx = 0;
 		ty = dy * 4;
 	}

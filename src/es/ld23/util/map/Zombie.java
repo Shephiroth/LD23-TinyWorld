@@ -15,13 +15,14 @@ public class Zombie extends PC {
 	private double diry = 0;
 	private int lastdir;
 
-	public Zombie(int w, int h) {
+	public Zombie(int w, int h, int nivel) {
 		super(Game.random.nextInt(w - Tile.tile_width), Game.random.nextInt(h - Tile.tile_height));
-		nivel = Game.random.nextInt(8);
+		this.nivel = nivel;
+		int textureRand = Game.random.nextInt(8);
 		hp = 50 + nivel * 45;
-		shootDelay = 200 - 5 * nivel;
-		setTextureCol((nivel % 4) * 3, 16);
-		setTextureFil((nivel / 4) * 4, 16);
+		shootDelay = 200 - 5 * textureRand;
+		setTextureCol((textureRand % 4) * 3, 16);
+		setTextureFil((textureRand / 4) * 4, 16);
 
 		lazyness = Game.random.nextInt(250) + 500;
 	}

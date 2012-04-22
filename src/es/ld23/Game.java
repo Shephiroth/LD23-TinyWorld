@@ -103,6 +103,12 @@ public class Game {
 		bulletsEnemigas.clear();
 		player.start();
 		map.nuevo(f, c);
+		for (int i = 0; i < f; i++) {
+			PC m = new Zombie(map.getWidth(), map.getHeight(), random.nextInt(4) + 24 - f);
+			map.findSpawLocation(m, mobs);
+			mobs.add(m);
+		}
+		map.findSpawLocation(player, mobs);
 		gameover = false;
 	}
 
@@ -270,12 +276,15 @@ public class Game {
 									break;
 								case 1:
 									console.addString("You clicked 22x22", textoNormal);
+									juegoNuevo(20, 20);
 									break;
 								case 2:
 									console.addString("You clicked 20x20", textoNormal);
+									juegoNuevo(16, 16);
 									break;
 								case 3:
 									console.addString("You clicked 16x16", textoNormal);
+									juegoNuevo(12, 12);
 									break;
 							}
 						}
@@ -450,14 +459,9 @@ public class Game {
 				if (Keyboard.getEventKey() == Keyboard.KEY_F2) {
 					salto.playAsSoundEffect(1, 1, false);
 				}
-//				if (Keyboard.getEventKey() == Keyboard.KEY_F5) {
-//					mobs.clear();
-//					bullets.clear();
-//					map.nuevo();
-//					for (int i = 0; i < 400; i++) {
-//						mobs.add(new Zombie(map.getWidth(), map.getHeight()));
-//					}
-//				}
+				if (Keyboard.getEventKey() == Keyboard.KEY_F5) {
+					gameover = true;
+				}
 			}
 		}
 
@@ -540,15 +544,6 @@ public class Game {
 			}
 			glEnd();
 			glDisable(GL_TEXTURE_2D);
-			glBegin(GL_QUADS);
-			{
-				glColor3d(1, 0, 0);
-				glVertex2d(menuMapOptions.x, menuMapOptions.y);
-				glVertex2d(menuMapOptions.x, menuMapOptions.y + bigfont.getLineHeight() * 1.5);
-				glVertex2d(menuMapOptions.x + menuMapOptions.width, menuMapOptions.y + bigfont.getLineHeight() * 1.5);
-				glVertex2d(menuMapOptions.x + menuMapOptions.width, menuMapOptions.y);
-			}
-			glEnd();
 			glColor3d(1, 1, 1);
 			bigfont.drawString(menuMapOptions.x, menuMapOptions.y, "Map 1 : 24x24");
 			bigfont.drawString(menuMapOptions.x, menuMapOptions.y + bigfont.getLineHeight() * 3 / 2, "Map 2 : 22x22", Map.map_1 ? Color.white : c);

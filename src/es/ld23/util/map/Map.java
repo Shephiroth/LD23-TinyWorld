@@ -71,6 +71,7 @@ public class Map {
 		mapBB = new BBRectangle(0, 0, map_w, map_h);
 		Tile water = Tile.Mar[Game.random.nextInt(Tile.Mar.length)];
 		Tile.setWaterLayer(water);
+		Noise.randomize();
 		for (int f = 0; f < map_f; f++) {
 			double n_f = f * 37.5 / map_w;
 			for (int c = 0; c < map_c; c++) {
@@ -144,6 +145,8 @@ public class Map {
 						setTile(f, c, Tile.FloresHierva[n][pos]);
 						createBB(f, c);
 					}
+				} else if (getTile(f, c) == water) {
+					createBB(f, c);
 				}
 			}
 		}
@@ -177,5 +180,22 @@ public class Map {
 
 	public int getHeight() {
 		return map_h;
+	}
+
+	public void findSpawLocation(PC m, ArrayList<PC> mobs) {
+		BBRectangle base = m.getBB();
+		double x,y;
+		boolean found;
+		do {
+			found = false;
+			x = Game.random.nextDouble() * map_w;
+			y = Game.random.nextDouble() * map_h;
+			base.moveTo(x, y);
+			for (PC pc : mobs) {
+				if (pc.getBB().collision(base))
+					found = true;
+			}
+		} while (found || !isFree(base));
+		m.moveTo(x, y);
 	}
 }
