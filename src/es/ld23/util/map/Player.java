@@ -1,9 +1,12 @@
 package es.ld23.util.map;
 
+import es.ld23.equipment.Weapon;
 import es.ld23.util.BBRectangle;
 import static org.lwjgl.opengl.GL11.*;
 
 public class Player extends PC {
+
+	private Weapon arma;
 
 	public Player() {
 		this.left = 0;
@@ -12,8 +15,27 @@ public class Player extends PC {
 		this.setTextureFil(0, 16);
 		this.setTextureCol(0, 16);
 
+		arma = Weapon.bow;
 		this.walk_frame = 0;
 		this.walk_direction = PC.PC_MOVE_DER;
+	}
+
+	public Weapon getWeapon() {
+		return arma;
+	}
+
+	public void setWeapon(Weapon nueva) {
+		if (nueva != null) {
+			arma = nueva;
+		}
+	}
+
+	public double getX() {
+		return left;
+	}
+
+	public double getY() {
+		return top;
 	}
 
 	public double getCameraY(int height, int h) {

@@ -1,5 +1,8 @@
 package es.ld23;
 
+import es.ld23.equipment.Bullet;
+import es.ld23.equipment.Weapon;
+import java.awt.Rectangle;
 import es.ld23.util.map.Zombie;
 import org.newdawn.slick.TrueTypeFont;
 import java.awt.Font;
@@ -34,15 +37,18 @@ public class Game {
 	//lista para el gui y consola
 	private boolean listRebuild = true;
 	private int list;
+	private Rectangle weaponRectangle;
 	//propios
 	private Console console;
 	private Color textoNormal;
 	private Map map;
 	private Player player;
 	private ArrayList<PC> mobs;
+	private ArrayList<Bullet> bullets;
 	//recursos
 	private TrueTypeFont font;
 	private Texture puntero;
+	private Texture textureItems;
 	private Texture textureTiles;
 	private Texture textureMobs;
 	private Audio explosion;
@@ -67,12 +73,14 @@ public class Game {
 		Font awtFont = new Font("Times New Roman", Font.BOLD, 14);
 		font = new TrueTypeFont(awtFont, true);
 		textoNormal = Color.green.brighter();
+		weaponRectangle = new Rectangle(width - 50, 152, 48, 48);
 		console = new Console(width - 200, 0, 200, 150);
 		console.setFont(font);
 		console.addString("Test Line. All this text is the same line. The code fit this text inside the area designated to console...at least for width, will fix height later :)", textoNormal);
 		map = new Map();
 		player = new Player();
 		mobs = new ArrayList<PC>();
+		bullets = new ArrayList<Bullet>();
 		for (int i = 0; i < 40; i++) {
 			mobs.add(new Zombie(map.getWidth(), map.getHeight()));
 		}
@@ -99,7 +107,8 @@ public class Game {
 			m_d_x = (int) (puntero.getTextureWidth() * 0.7);
 			m_d_y = (int) (puntero.getTextureHeight() * 0.7);
 			textureTiles = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/tiles.png"), GL_NEAREST);
-			textureMobs = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/mobs.png"), GL_NEAREST);
+			textureItems = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/items.png"));
+			textureMobs = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/mobs.png"));
 			explosion = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/Explosion.wav"));
 			salto = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/Jump.wav"));
 		} catch (IOException ex) {
@@ -117,6 +126,8 @@ public class Game {
 		Color.white.bind();
 		textureTiles.bind();
 		map.render();
+		textureItems.bind();
+		renderBullets();
 		textureMobs.bind();
 		renderMobs();
 		glLoadIdentity();
@@ -138,6 +149,19 @@ public class Game {
 				mob.renderText(font, Color.white);
 			}
 		}
+	}
+
+	private void renderBullets() {
+		if (bullets.isEmpty()) {
+			return;
+		}
+		glBegin(GL_QUADS);
+		{
+			for (Bullet bullet : bullets) {
+				bullet.render();
+			}
+		}
+		glEnd();
 	}
 
 	private void renderPuntero() {
@@ -174,6 +198,8 @@ public class Game {
 		glDisable(GL_TEXTURE_2D);
 		glEnable(GL_BLEND);
 		console.render();
+		textureItems.bind();
+		Weapon.bow.render(weaponRectangle);
 		renderPuntero();
 	}
 
@@ -235,8 +261,15 @@ public class Game {
 		if (dx != 0 || dy != 0) {
 			player.move(dx, dy);
 		}
-		for (PC mob : mobs) {
-			mob.tick(delta);
+		if (!mobs.isEmpty()) {
+			for (PC mob : mobs) {
+				mob.tick(delta);
+			}
+		}
+		if (!bullets.isEmpty()) {
+			for (Bullet bullet : bullets) {
+				bullet.tick(delta);
+			}
 		}
 
 
@@ -245,6 +278,16 @@ public class Game {
 				if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
 					Mouse.setGrabbed(false);
 					Mouse.setCursorPosition(punteroLocation.getX(), punteroLocation.getY());
+				}
+				if (Keyboard.getEventKey() == Keyboard.KEY_SPACE) {
+					Weapon arma = player.getWeapon();
+					if (arma != null) {
+						Bullet b = arma.fire();
+						if (b != null) {
+							b.setLocation(player.getX(), player.getY());
+							bullets.add(b);
+						}
+					}
 				}
 				if (Keyboard.getEventKey() == Keyboard.KEY_F1) {
 					explosion.playAsMusic(1, 1, false);
