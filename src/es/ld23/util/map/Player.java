@@ -3,27 +3,34 @@ package es.ld23.util.map;
 import es.ld23.equipment.Bullet;
 import es.ld23.equipment.Weapon;
 import es.ld23.util.BBRectangle;
-import static org.lwjgl.opengl.GL11.*;
 
 public class Player extends PC {
 
+	private int nivel;
 	private Weapon arma;
 	private double hp;
 	private int score;
+	private int gold;
 
 	public Player() {
-		left = 0;
-		top = 0;
-		BB = new BBRectangle(5, 5, Tile.tile_width - 10, Tile.tile_height - 10);
+		start();
+		gold = 0;
+		nivel = 1;
 		setTextureFil(0, 16);
 		setTextureCol(0, 16);
 		walk_frame = 0;
 		walk_direction = PC.PC_MOVE_DER;
-
-
 		this.arma = Weapon.bow;
 		this.score = 0;
-		this.hp = 50;
+		this.hp = 10;
+	}
+
+	public final void start() {
+		left = 0;
+		top = 0;
+		BB = new BBRectangle(5, 5, Tile.tile_width - 10, Tile.tile_height - 10);
+		score = 0;
+		hp = nivel * 50;
 	}
 
 	public void addScore(int puntos) {
@@ -37,7 +44,7 @@ public class Player extends PC {
 	@Override
 	public boolean hurt(double dmg) {
 		hp -= dmg;
-		return false;
+		return hp <= 0;
 	}
 
 	public Weapon getWeapon() {
@@ -49,7 +56,6 @@ public class Player extends PC {
 			arma = nueva;
 		}
 	}
-
 
 	public double getCameraY(int height, int h) {
 		double half = (height - Tile.tile_height) / 2.0;

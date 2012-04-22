@@ -8,8 +8,12 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class Map {
 
-	private int map_f = 20;
-	private int map_c = 20;
+	public static boolean map_0 = true;
+	public static boolean map_1 = false;
+	public static boolean map_2 = false;
+	public static boolean map_3 = false;
+	private int map_f;
+	private int map_c;
 	private Tile tiles[];
 	private boolean listRebuild = true;
 	private int list;
@@ -20,7 +24,7 @@ public class Map {
 
 	public Map() {
 		Noise.randomize();
-		nuevo();
+		nuevo(20, 20);
 	}
 
 	private Tile getTile(int f, int c) {
@@ -56,7 +60,9 @@ public class Map {
 		glEnd();
 	}
 
-	public final void nuevo() {
+	public final void nuevo(int fil, int col) {
+		map_f = fil;
+		map_c = col;
 		listRebuild = true;
 		boundingbox.clear();
 		tiles = new Tile[map_f * map_c];

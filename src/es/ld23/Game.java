@@ -37,9 +37,12 @@ public class Game {
 	//lista para el gui y consola
 	private boolean listRebuild = true;
 	private int list;
-	private Rectangle weaponRectangle;
 	private int playerDir;
+	private int gameoverDelay = -2;
+	private boolean gameover;
 	//propios
+	private Rectangle menuMapOptions;
+	private Rectangle weaponRectangle;
 	private Console console;
 	private Color textoNormal;
 	private Map map;
@@ -49,10 +52,12 @@ public class Game {
 	private ArrayList<Bullet> bulletsEnemigas;
 	//recursos
 	private TrueTypeFont font;
+	private TrueTypeFont bigfont;
 	private Texture puntero;
 	private Texture textureItems;
-	private Texture textureTiles;
 	private Texture textureMobs;
+	private Texture textureTiles;
+	private Texture textureTitulos;
 	private Audio explosion;
 	private Audio disparo;
 	private Audio impacto;
@@ -76,7 +81,10 @@ public class Game {
 		height = h;
 		Font awtFont = new Font("Times New Roman", Font.BOLD, 14);
 		font = new TrueTypeFont(awtFont, true);
+		awtFont = new Font("Times New Roman", Font.BOLD, 24);
+		bigfont = new TrueTypeFont(awtFont, true);
 		textoNormal = Color.green.brighter();
+		menuMapOptions = new Rectangle(85, 325, bigfont.getWidth("Map 1 : 24x24"), bigfont.getLineHeight() * 8);
 		weaponRectangle = new Rectangle(width - 50, 152, 48, 48);
 		console = new Console(width - 200, 0, 200, 150);
 		console.setFont(font);
@@ -86,9 +94,16 @@ public class Game {
 		mobs = new ArrayList<PC>();
 		bullets = new ArrayList<Bullet>();
 		bulletsEnemigas = new ArrayList<Bullet>();
-		for (int i = 0; i < 20; i++) {
-			mobs.add(new Zombie(map.getWidth(), map.getHeight()));
-		}
+		gameover = true;
+	}
+
+	private void juegoNuevo(int f, int c) {
+		mobs.clear();
+		bullets.clear();
+		bulletsEnemigas.clear();
+		player.start();
+		map.nuevo(f, c);
+		gameover = false;
 	}
 
 	public void initGL() {
@@ -114,6 +129,7 @@ public class Game {
 			textureTiles = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/tiles.png"), GL_NEAREST);
 			textureItems = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/items.png"));
 			textureMobs = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/mobs.png"));
+			textureTitulos = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/titulos.png"));
 			explosion = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/explosion.wav"));
 			salto = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/jump.wav"));
 			disparo = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/disparo.wav"));
@@ -138,6 +154,9 @@ public class Game {
 		textureMobs.bind();
 		renderMobs();
 		glLoadIdentity();
+		if (gameover) {
+			renderGameover();
+		}
 		renderGui();
 	}
 
@@ -220,11 +239,61 @@ public class Game {
 		renderPuntero();
 	}
 
+	private void tickGameover(long delta) {
+		if (gameoverDelay > 0) {
+			gameoverDelay -= delta;
+		} else {
+			while (Keyboard.next()) {
+				if (Keyboard.getEventKeyState()) {
+					if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
+						Mouse.setGrabbed(false);
+						Mouse.setCursorPosition(punteroLocation.getX(), punteroLocation.getY());
+					}
+				}
+			}
+			while (Mouse.next()) {
+				if (Mouse.getEventButtonState()) {
+					if (!Mouse.isGrabbed()) {
+						Mouse.setGrabbed(true);
+					} else {
+						int x = Mouse.getEventX();
+						int y = height - Mouse.getEventY();
+						System.out.println("X=" + x + " Y=" + y);
+						if (menuMapOptions.contains(x, y)) {
+							y -= menuMapOptions.y;
+							int p = (int) (y / (bigfont.getLineHeight() * 1.5));
+							System.out.println("Y=" + y + " H=" + bigfont.getLineHeight() * 2 + " P=" + p);
+							switch (p) {
+								case 0:
+									console.addString("You clicked 24x24", textoNormal);
+									juegoNuevo(24, 24);
+									break;
+								case 1:
+									console.addString("You clicked 22x22", textoNormal);
+									break;
+								case 2:
+									console.addString("You clicked 20x20", textoNormal);
+									break;
+								case 3:
+									console.addString("You clicked 16x16", textoNormal);
+									break;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 	public void tick(long delta) {
 		if (delta == 0) {
 			return;
 		}
-
+		punteroLocation.setLocation(Mouse.getX(), Mouse.getY());
+		if (gameover) {
+			tickGameover(delta);
+			return;
+		}
 		boolean izq = Keyboard.isKeyDown(Keyboard.KEY_A) || Keyboard.isKeyDown(Keyboard.KEY_LEFT);
 		boolean der = Keyboard.isKeyDown(Keyboard.KEY_D) || Keyboard.isKeyDown(Keyboard.KEY_RIGHT);
 		boolean arr = Keyboard.isKeyDown(Keyboard.KEY_W) || Keyboard.isKeyDown(Keyboard.KEY_UP);
@@ -294,9 +363,11 @@ public class Game {
 					mob.cancelMovement(delta);
 				}
 				if (mob.canShoot()) {
-					if (Game.random.nextDouble()>0.9)
-					bulletsEnemigas.add(mob.fire());
-					else mob.fakeFire();
+					if (Game.random.nextDouble() > 0.9) {
+						bulletsEnemigas.add(mob.fire());
+					} else {
+						mob.fakeFire();
+					}
 				}
 			}
 		}
@@ -340,7 +411,11 @@ public class Game {
 						b--;
 					}
 					if (bullet.getBB().collision(player.getBB())) {
-						player.hurt(bullet.getDmg());
+						if (player.hurt(bullet.getDmg())) {
+							gameover = true;
+							gameoverDelay = 2000;
+							this.explosion.playAsSoundEffect(1, 1, false);
+						}
 						bulletsEnemigas.remove(b);
 						b = bulletsEnemigas.size();
 					}
@@ -350,8 +425,6 @@ public class Game {
 				}
 			}
 		}
-
-
 		while (Keyboard.next()) {
 			if (Keyboard.getEventKeyState()) {
 				if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
@@ -377,14 +450,14 @@ public class Game {
 				if (Keyboard.getEventKey() == Keyboard.KEY_F2) {
 					salto.playAsSoundEffect(1, 1, false);
 				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_F5) {
-					mobs.clear();
-					bullets.clear();
-					map.nuevo();
-					for (int i = 0; i < 400; i++) {
-						mobs.add(new Zombie(map.getWidth(), map.getHeight()));
-					}
-				}
+//				if (Keyboard.getEventKey() == Keyboard.KEY_F5) {
+//					mobs.clear();
+//					bullets.clear();
+//					map.nuevo();
+//					for (int i = 0; i < 400; i++) {
+//						mobs.add(new Zombie(map.getWidth(), map.getHeight()));
+//					}
+//				}
 			}
 		}
 
@@ -395,8 +468,6 @@ public class Game {
 				}
 			}
 		}
-
-		punteroLocation.setLocation(Mouse.getX(), Mouse.getY());
 	}
 
 	private boolean checkBB(BBRectangle targetBB) {
@@ -432,5 +503,57 @@ public class Game {
 		}
 		glEnd();
 		console.renderBackground();
+	}
+
+	private void renderGameover() {
+		glEnable(GL_TEXTURE_2D);
+		glEnable(GL_BLEND);
+		textureTitulos.bind();
+		if (gameoverDelay > 0) {
+			double prop = 1 - (gameoverDelay / 2000.0);
+			glColor4d(1, 1, 1, prop);
+			glBegin(GL_QUADS);
+			{
+				glTexCoord2d(0, 0);
+				glVertex2d(0, 0);
+				glTexCoord2d(0, 0.5);
+				glVertex2d(0, height);
+				glTexCoord2d(0.75, 0.5);
+				glVertex2d(width - 200, height);
+				glTexCoord2d(0.75, 0);
+				glVertex2d(width - 200, 0);
+			}
+			glEnd();
+		} else {
+			Color c = Color.decode("0x40FFFFFF");
+			glColor4d(1, 1, 1, 1);
+			glBegin(GL_QUADS);
+			{
+				glTexCoord2d(0, 0.5);
+				glVertex2d(0, 0);
+				glTexCoord2d(0, 1);
+				glVertex2d(0, height);
+				glTexCoord2d(0.75, 1);
+				glVertex2d(width - 200, height);
+				glTexCoord2d(0.75, 0.5);
+				glVertex2d(width - 200, 0);
+			}
+			glEnd();
+			glDisable(GL_TEXTURE_2D);
+			glBegin(GL_QUADS);
+			{
+				glColor3d(1, 0, 0);
+				glVertex2d(menuMapOptions.x, menuMapOptions.y);
+				glVertex2d(menuMapOptions.x, menuMapOptions.y + bigfont.getLineHeight() * 1.5);
+				glVertex2d(menuMapOptions.x + menuMapOptions.width, menuMapOptions.y + bigfont.getLineHeight() * 1.5);
+				glVertex2d(menuMapOptions.x + menuMapOptions.width, menuMapOptions.y);
+			}
+			glEnd();
+			glColor3d(1, 1, 1);
+			bigfont.drawString(menuMapOptions.x, menuMapOptions.y, "Map 1 : 24x24");
+			bigfont.drawString(menuMapOptions.x, menuMapOptions.y + bigfont.getLineHeight() * 3 / 2, "Map 2 : 22x22", Map.map_1 ? Color.white : c);
+			bigfont.drawString(menuMapOptions.x, menuMapOptions.y + bigfont.getLineHeight() * 3, "Map 3 : 20x20", Map.map_2 ? Color.white : c);
+			bigfont.drawString(menuMapOptions.x, menuMapOptions.y + bigfont.getLineHeight() * 9 / 2, "Map 4 : 16x16", Map.map_3 ? Color.white : c);
+		}
 	}
 }
