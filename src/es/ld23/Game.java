@@ -1,5 +1,7 @@
 package es.ld23;
 
+import es.ld23.equipment.Armor;
+import es.ld23.equipment.Arrow;
 import es.ld23.equipment.Bullet;
 import es.ld23.equipment.Weapon;
 import java.awt.Rectangle;
@@ -53,7 +55,12 @@ public class Game {
 	private ArrayList<Bullet> bullets;
 	private ArrayList<Bullet> bulletsEnemigas;
 	//shop
-	
+	private int defShop;
+	private int defShopPrize;
+	private Rectangle defShopRect;
+	private int arrShop;
+	private int arrShopPrize;
+	private Rectangle arrShopRect;
 	//recursos
 	private TrueTypeFont font;
 	private TrueTypeFont bigfont;
@@ -68,6 +75,7 @@ public class Game {
 	private Audio impacto;
 	private Audio salto;
 	private Audio select;
+	private Audio shop;
 
 	static public void textureInfo(Texture target) {
 		System.out.println("Texture info: " + target.getTextureRef());
@@ -94,6 +102,8 @@ public class Game {
 		rectWeapon = new Rectangle(width - 178, 177, 48, 48);
 		rectArrow = new Rectangle(width - 124, 177, 48, 48);
 		rectArmor = new Rectangle(width - 70, 177, 48, 48);
+		arrShopRect = new Rectangle(width - 190, 375, 48, 48);
+		defShopRect = new Rectangle(width - 190, 425, 48, 48);
 		console = new Console(width - 200, 0, 200, 150);
 		console.setFont(font);
 		console.addString("Test Line. All this text is the same line. The code fit this text inside the area designated to console...at least for width, will fix height later :)", textoNormal);
@@ -103,6 +113,11 @@ public class Game {
 		bullets = new ArrayList<Bullet>();
 		bulletsEnemigas = new ArrayList<Bullet>();
 		gameover = true;
+
+		arrShop = player.getArrowInt() + 1;
+		arrShopPrize = arrShop * arrShop * 250;
+		defShop = player.getArmorInt() + 1;
+		defShopPrize = defShop * defShop * 250;
 	}
 
 	private void juegoNuevo(int f, int c) {
@@ -150,6 +165,7 @@ public class Game {
 			damage = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/damage.wav"));
 			disparo = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/disparo.wav"));
 			impacto = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/disparo_impacto.wav"));
+			shop = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/shop.wav"));
 		} catch (IOException ex) {
 			Game.debug("Game::loadResources  ->  " + ex.getMessage());
 		}
@@ -257,13 +273,17 @@ public class Game {
 		font.drawString(right, 255 + font.getLineHeight() * 2, "Speed: " + (1000.0 / player.getWeapon().getDelay()), Color.blue);
 		font.drawString(left, 255 + font.getLineHeight() * 3, "EXP: " + (player.getNextExp() - player.getExp()), Color.blue);
 		font.drawString(right, 255 + font.getLineHeight() * 3, "Def: " + player.getDefense(), Color.blue);
+		font.drawString(defShopRect.x + defShopRect.width + 5, defShopRect.y + font.getLineHeight() / 2, "Update Defense: " + defShopPrize, Color.blue);
+		font.drawString(defShopRect.x + defShopRect.width + 5, defShopRect.y + font.getLineHeight() * 3 / 2, "New Def = " + Armor.armors[defShop].getDefense(), Color.blue);
+		font.drawString(arrShopRect.x + arrShopRect.width + 5, arrShopRect.y + font.getLineHeight() / 2, "Update Weapon: " + arrShopPrize, Color.blue);
+		font.drawString(arrShopRect.x + arrShopRect.width + 5, arrShopRect.y + font.getLineHeight() * 3 / 2, "New Att: " + (player.getWeapon().getDmg() + Arrow.arrows[arrShop].getDmg()), Color.blue);
 		console.render();
 		textureItems.bind();
 		player.getWeapon().render(rectWeapon);
 		player.getArrow().render(rectArrow);
-		if (player.getArmor() != null) {
-			player.getArmor().render(rectArmor);
-		}
+		player.getArmor().render(rectArmor);
+		Armor.armors[defShop].render(defShopRect);
+		Arrow.arrows[arrShop].render(arrShopRect);
 		renderPuntero();
 	}
 
@@ -310,6 +330,34 @@ public class Game {
 									juegoNuevo(12, 12);
 									select.playAsSoundEffect(1, 1, false);
 									break;
+							}
+						}
+						if (defShopPrize > 0 && defShopRect.contains(x, y)) {
+							if (player.getGold() >= defShopPrize) {
+								player.setArmor(defShop);
+								player.removeGold(defShopPrize);
+								shop.playAsSoundEffect(1, 1, false);
+								defShop++;
+								if (defShop < Armor.armors.length) {
+									defShopPrize = defShop * defShop * 250;
+								} else {
+									defShop--;
+									defShopPrize = 0;
+								}
+							}
+						}
+						if (arrShopPrize > 0 && arrShopRect.contains(x, y)) {
+							if (player.getGold() >= arrShopPrize) {
+								player.setArrow(arrShop);
+								player.removeGold(arrShopPrize);
+								shop.playAsSoundEffect(1, 1, false);
+								arrShop++;
+								if (arrShop < Arrow.arrows.length) {
+									arrShopPrize = arrShop * arrShop * 250;
+								} else {
+									arrShop--;
+									arrShopPrize = 0;
+								}
 							}
 						}
 					}
@@ -467,6 +515,7 @@ public class Game {
 					}
 					if (bullet.getBB().collision(player.getBB())) {
 						if (player.hurt(bullet.getDmg())) {
+							player.updateStat();
 							gameover = true;
 							gameoverDelay = 2000;
 							explosion.playAsSoundEffect(1, 1, false);

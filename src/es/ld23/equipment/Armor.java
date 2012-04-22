@@ -5,7 +5,11 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class Armor {
 
-	public static final Armor Default = new Armor(0, 1);
+	public static final Armor armors[] = new Armor[]{
+		new Armor(0, 1), new Armor(1, 5),
+		new Armor(2, 10), new Armor(3, 20),
+		new Armor(4, 35)
+	};
 	private static final double dy = 24.0 / 256.0;
 	private static final double dx = 24.0 / 256.0;
 	private static final double ty_top = 48.0 / 256.0 - dy;

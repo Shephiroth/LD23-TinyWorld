@@ -8,7 +8,9 @@ public class Weapon {
 	protected double ty_top = 48.0 / 256.0;
 	public static final double dy = 24.0 / 256.0;
 	public static final double dx = 24.0 / 256.0;
-	public static final Weapon bow = new Weapon(0, true, 20, 10, 350);
+	public static final Weapon weapons[] = new Weapon[]{
+		new Weapon(0, true, 20, 10, 350)
+	};
 	private boolean createBullet;
 	private double dmg;
 	private int delay;

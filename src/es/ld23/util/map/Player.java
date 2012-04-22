@@ -9,9 +9,9 @@ import es.ld23.util.BBRectangle;
 public class Player extends PC {
 
 	private int nivel;
-	private Weapon arma;
-	private Arrow arrow;
-	private Armor armor;
+	private int weapon;
+	private int arrow;
+	private int armor;
 	private double hp;
 	private int exp;
 	private int score;
@@ -19,17 +19,17 @@ public class Player extends PC {
 
 	public Player() {
 		start();
-		gold = 0;
+		gold = 500;
 		nivel = 1;
 		setTextureFil(0, 16);
 		setTextureCol(0, 16);
 		walk_frame = 0;
 		walk_direction = PC.PC_MOVE_DER;
-		this.arma = Weapon.bow;
-		this.arrow = Arrow.Default;
-		this.armor = Armor.Default;
+		this.weapon = 0;
+		this.arrow = 0;
+		this.armor = 0;
 		this.score = 0;
-		this.hp = 10;
+		this.hp = 50;
 	}
 
 	public void updateStat() {
@@ -63,28 +63,49 @@ public class Player extends PC {
 		return hp <= 0;
 	}
 
-	public Weapon getWeapon() {
-		return arma;
+	public int getWeaponInt() {
+		return weapon;
 	}
 
-	public Arrow getArrow() {
+	public int getArrowInt() {
 		return arrow;
 	}
 
-	public Armor getArmor() {
+	public int getArmorInt() {
 		return armor;
 	}
 
-	public void setWeapon(Weapon nueva) {
-		if (nueva != null) {
-			arma = nueva;
-		}
+	public Weapon getWeapon() {
+		return Weapon.weapons[weapon];
 	}
 
-	public void setArrow(Arrow arrow) {
-		if (arrow != null) {
-			this.arrow = arrow;
+	public Arrow getArrow() {
+		return Arrow.arrows[arrow];
+	}
+
+	public Armor getArmor() {
+		return Armor.armors[armor];
+	}
+
+	public void setWeapon(int nueva) {
+		if (nueva < 0 || nueva > Weapon.weapons.length) {
+			return;
 		}
+		weapon = nueva;
+	}
+
+	public void setArrow(int arrow) {
+		if (arrow < 0 || arrow > Arrow.arrows.length) {
+			return;
+		}
+		this.arrow = arrow;
+	}
+
+	public void setArmor(int armor) {
+		if (armor < 0 || armor > Armor.armors.length) {
+			return;
+		}
+		this.armor = armor;
 	}
 
 	public double getCameraY(int height, int h) {
@@ -132,8 +153,8 @@ public class Player extends PC {
 	}
 
 	public Bullet fire() {
-		this.delay = arma.getDelay();
-		return arma.fire();
+		this.delay = getWeapon().getDelay();
+		return getWeapon().fire();
 	}
 
 	public double getHP() {
@@ -157,9 +178,14 @@ public class Player extends PC {
 	}
 
 	public double getDmg() {
-		return arma.getDmg() + arrow.getDmg();
+		return getWeapon().getDmg() + getArrow().getDmg();
 	}
+
 	public int getDefense() {
-		return armor.getDefense();
+		return getArmor().getDefense();
+	}
+
+	public void removeGold(int prize) {
+		gold -= prize;
 	}
 }
