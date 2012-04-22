@@ -4,18 +4,12 @@ import java.util.ArrayList;
 import es.ld23.Game;
 import es.ld23.util.BBRectangle;
 import es.ld23.util.Noise;
-import java.io.IOException;
-import org.newdawn.slick.Color;
-import org.newdawn.slick.opengl.Texture;
-import org.newdawn.slick.opengl.TextureLoader;
-import org.newdawn.slick.util.ResourceLoader;
 import static org.lwjgl.opengl.GL11.*;
 
 public class Map {
 
 	private int map_f = 30;
 	private int map_c = 30;
-	private Texture textureTiles;
 	private Tile tiles[];
 	private boolean listRebuild = true;
 	private int list;
@@ -41,10 +35,6 @@ public class Map {
 	}
 
 	public void render() {
-		glEnable(GL_TEXTURE_2D);
-		glEnable(GL_BLEND);
-		textureTiles.bind();
-		Color.white.bind();
 		if (listRebuild) {
 			list = glGenLists(1);
 			glNewList(list, GL_COMPILE);
@@ -53,14 +43,6 @@ public class Map {
 			listRebuild = false;
 		}
 		glCallList(list);
-	}
-
-	public void loadResources() {
-		try {
-			textureTiles = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/tiles.png"), GL_NEAREST);
-		} catch (IOException ex) {
-			Game.debug("Map::loadResources  ->  " + ex.getMessage());
-		}
 	}
 
 	private void renderMap() {

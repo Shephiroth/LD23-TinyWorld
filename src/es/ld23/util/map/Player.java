@@ -42,7 +42,7 @@ public class Player extends PC {
 		return (int) -res;
 	}
 
-	public void render() {
+	public void render2() {
 		double ntx = tx + dx * walk_frame;
 		double nty = ty + dy * walk_direction;
 

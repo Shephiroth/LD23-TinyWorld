@@ -31,6 +31,9 @@ public class Game {
 	private int m_d_x;
 	private int m_d_y;
 	private Point punteroLocation = new Point(0, 0);
+	//lista para el gui y consola
+	private boolean listRebuild = true;
+	private int list;
 	//propios
 	private Console console;
 	private Color textoNormal;
@@ -39,10 +42,11 @@ public class Game {
 	private ArrayList<PC> mobs;
 	//recursos
 	private TrueTypeFont font;
-	private Texture puntero = null;
-	private Texture mob_texture = null;
-	private Audio explosion = null;
-	private Audio salto = null;
+	private Texture puntero;
+	private Texture textureTiles;
+	private Texture textureMobs;
+	private Audio explosion;
+	private Audio salto;
 
 	static public void textureInfo(Texture target) {
 		System.out.println("Texture info: " + target.getTextureRef());
@@ -62,8 +66,8 @@ public class Game {
 		height = h;
 		Font awtFont = new Font("Times New Roman", Font.BOLD, 14);
 		font = new TrueTypeFont(awtFont, true);
-		textoNormal = Color.blue;
-		console = new Console(100, 100, 200, 75);
+		textoNormal = Color.green.brighter();
+		console = new Console(width - 200, 0, 200, 150);
 		console.setFont(font);
 		console.addString("Test Line. All this text is the same line. The code fit this text inside the area designated to console...at least for width, will fix height later :)", textoNormal);
 		map = new Map();
@@ -94,31 +98,32 @@ public class Game {
 			puntero = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/puntero_red.png"));
 			m_d_x = (int) (puntero.getTextureWidth() * 0.7);
 			m_d_y = (int) (puntero.getTextureHeight() * 0.7);
-			mob_texture = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/mobs.png"));
+			textureTiles = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/tiles.png"), GL_NEAREST);
+			textureMobs = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/mobs.png"), GL_NEAREST);
 			explosion = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/Explosion.wav"));
 			salto = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/Jump.wav"));
 		} catch (IOException ex) {
 			Game.debug("Game::loadResources  ->  " + ex.getMessage());
 		}
-		map.loadResources();
 	}
 
 	public void render() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glLoadIdentity();
-		glTranslated(player.getCameraX(width, map.getWidth()), player.getCameraY(height, map.getHeight()), 0);
-		map.render();
-		renderMobs();
-		glLoadIdentity();
-//		console.render();
-		renderPuntero();
-	}
+		glTranslated(player.getCameraX(width - 200, map.getWidth()), player.getCameraY(height, map.getHeight()), 0);
 
-	private void renderMobs() {
 		glEnable(GL_TEXTURE_2D);
 		glEnable(GL_BLEND);
 		Color.white.bind();
-		mob_texture.bind();
+		textureTiles.bind();
+		map.render();
+		textureMobs.bind();
+		renderMobs();
+		glLoadIdentity();
+		renderGui();
+	}
+
+	private void renderMobs() {
 		glBegin(GL_QUADS);
 		if (!mobs.isEmpty()) {
 			for (PC mob : mobs) {
@@ -133,6 +138,43 @@ public class Game {
 				mob.renderText(font, Color.white);
 			}
 		}
+	}
+
+	private void renderPuntero() {
+		if (Mouse.isGrabbed()) {
+			int m_x = punteroLocation.getX();
+			int m_y = height - punteroLocation.getY();
+			glEnable(GL_TEXTURE_2D);
+			glEnable(GL_BLEND);
+			glColor3d(1, 1, 1);
+			puntero.bind();
+			glBegin(GL_QUADS);
+			glTexCoord2d(0, 0);
+			glVertex2i(m_x, m_y);
+			glTexCoord2d(0, 1);
+			glVertex2i(m_x, m_y + m_d_y);
+			glTexCoord2d(1, 1);
+			glVertex2i(m_x + m_d_x, m_y + m_d_y);
+			glTexCoord2d(1, 0);
+			glVertex2i(m_x + m_d_x, m_y);
+			glEnd();
+		}
+	}
+
+	private void renderGui() {
+		textureTiles.bind();
+		if (listRebuild) {
+			list = glGenLists(1);
+			glNewList(list, GL_COMPILE);
+			renderRawGui();
+			glEndList();
+			listRebuild = false;
+		}
+		glCallList(list);
+		glDisable(GL_TEXTURE_2D);
+		glEnable(GL_BLEND);
+		console.render();
+		renderPuntero();
 	}
 
 	public void tick(long delta) {
@@ -164,10 +206,10 @@ public class Game {
 			}
 		} else if (der) {
 			if (arr) {
-				dx += delta * PC.walk_speed *PC. diagonal_change;
-				dy -= delta * PC.walk_speed *PC. diagonal_change;
+				dx += delta * PC.walk_speed * PC.diagonal_change;
+				dy -= delta * PC.walk_speed * PC.diagonal_change;
 			} else if (aba) {
-				dx += delta *PC. walk_speed * PC.diagonal_change;
+				dx += delta * PC.walk_speed * PC.diagonal_change;
 				dy += delta * PC.walk_speed * PC.diagonal_change;
 			} else {
 				dx += delta * PC.walk_speed;
@@ -231,27 +273,6 @@ public class Game {
 		punteroLocation.setLocation(Mouse.getX(), Mouse.getY());
 	}
 
-	private void renderPuntero() {
-		if (Mouse.isGrabbed()) {
-			int m_x = punteroLocation.getX();
-			int m_y = height - punteroLocation.getY();
-			glEnable(GL_TEXTURE_2D);
-			glEnable(GL_BLEND);
-			glColor3d(1, 1, 1);
-			puntero.bind();
-			glBegin(GL_QUADS);
-			glTexCoord2d(0, 0);
-			glVertex2i(m_x, m_y);
-			glTexCoord2d(0, 1);
-			glVertex2i(m_x, m_y + m_d_y);
-			glTexCoord2d(1, 1);
-			glVertex2i(m_x + m_d_x, m_y + m_d_y);
-			glTexCoord2d(1, 0);
-			glVertex2i(m_x + m_d_x, m_y);
-			glEnd();
-		}
-	}
-
 	private boolean checkBB(BBRectangle playerbb) {
 		if (!map.isFree(playerbb)) {
 			return false;
@@ -265,5 +286,26 @@ public class Game {
 		}
 
 		return true;
+	}
+
+	private void renderRawGui() {
+		glColor3d(1, 1, 1);
+		int h = 100;
+		glBegin(GL_QUADS);
+		{
+			while (h < height) {
+				glTexCoord2d(0, 0.75);
+				glVertex2i(width - 200, h);
+				glTexCoord2d(0, 1);
+				glVertex2i(width - 200, h + 64);
+				glTexCoord2d(0.25, 1);
+				glVertex2i(width, h + 64);
+				glTexCoord2d(0.25, 0.75);
+				glVertex2i(width, h);
+				h += 64;
+			}
+		}
+		glEnd();
+		console.renderBackground();
 	}
 }
