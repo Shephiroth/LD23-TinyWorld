@@ -12,10 +12,17 @@ public abstract class PC {
 	public static final int PC_MOVE_DER = 2;
 	public static final int PC_MOVE_ARR = 3;
 	public static final int PC_MOVE_EMPTY = 4;
+	public static final double walk_speed = 0.27;
+	public static final double diagonal_change = Math.sqrt(0.5);
 	protected BBRectangle BB;
+	//texture
 	protected double dx, dy;
 	protected double tx, ty;
 	protected double left, top;
+	//walking 
+	protected int walk_frame;//cols
+	protected int walk_direction;//fils
+	protected long deltaAcumulado;
 
 	protected PC() {
 	}
@@ -53,17 +60,33 @@ public abstract class PC {
 	}
 
 	public void render() {
-		glTexCoord2d(tx, ty);
+		double ntx = tx + dx * walk_frame;
+		double nty = ty + dy * walk_direction;
+
+
+		glTexCoord2d(ntx, nty);
 		glVertex2d(left, top);
-		glTexCoord2d(tx, ty + dy);
+		glTexCoord2d(ntx, nty + dy);
 		glVertex2d(left, top + Tile.tile_height);
-		glTexCoord2d(tx + dx, ty + dy);
+		glTexCoord2d(ntx + dx, nty + dy);
 		glVertex2d(left + Tile.tile_width, top + Tile.tile_height);
-		glTexCoord2d(tx + dx, ty);
+		glTexCoord2d(ntx + dx, nty);
 		glVertex2d(left + Tile.tile_width, top);
 	}
 
 	public void tick(long delta) {
+	}
+
+	public void walkTick(long delta) {
+		//empty
+		deltaAcumulado += delta;
+		if (deltaAcumulado > 250) {
+			deltaAcumulado -= 250;
+			walk_frame++;
+			if (walk_frame >= 3) {
+				walk_frame = 0;
+			}
+		}
 	}
 
 	public void renderText(TrueTypeFont font, Color color) {

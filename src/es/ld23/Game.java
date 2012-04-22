@@ -25,8 +25,6 @@ import static org.lwjgl.opengl.GL11.*;
 public class Game {
 
 	public static final Random random = new Random();
-	private static final double walk_speed = 0.27;
-	private static final double diagonal_change = Math.sqrt(0.5);
 	private static final boolean debug = true;
 	private int width;
 	private int height;
@@ -71,7 +69,7 @@ public class Game {
 		map = new Map();
 		player = new Player();
 		mobs = new ArrayList<PC>();
-		for (int i = 0; i < 400; i++) {
+		for (int i = 0; i < 40; i++) {
 			mobs.add(new Zombie(map.getWidth(), map.getHeight()));
 		}
 	}
@@ -156,28 +154,28 @@ public class Game {
 		double dy = 0;
 		if (izq) {
 			if (arr) {
-				dx -= delta * walk_speed * diagonal_change;
-				dy -= delta * walk_speed * diagonal_change;
+				dx -= delta * PC.walk_speed * PC.diagonal_change;
+				dy -= delta * PC.walk_speed * PC.diagonal_change;
 			} else if (aba) {
-				dx -= delta * walk_speed * diagonal_change;
-				dy += delta * walk_speed * diagonal_change;
+				dx -= delta * PC.walk_speed * PC.diagonal_change;
+				dy += delta * PC.walk_speed * PC.diagonal_change;
 			} else {
-				dx -= delta * walk_speed;
+				dx -= delta * PC.walk_speed;
 			}
 		} else if (der) {
 			if (arr) {
-				dx += delta * walk_speed * diagonal_change;
-				dy -= delta * walk_speed * diagonal_change;
+				dx += delta * PC.walk_speed *PC. diagonal_change;
+				dy -= delta * PC.walk_speed *PC. diagonal_change;
 			} else if (aba) {
-				dx += delta * walk_speed * diagonal_change;
-				dy += delta * walk_speed * diagonal_change;
+				dx += delta *PC. walk_speed * PC.diagonal_change;
+				dy += delta * PC.walk_speed * PC.diagonal_change;
 			} else {
-				dx += delta * walk_speed;
+				dx += delta * PC.walk_speed;
 			}
 		} else if (arr) {
-			dy -= delta * walk_speed;
+			dy -= delta * PC.walk_speed;
 		} else if (aba) {
-			dy += delta * walk_speed;
+			dy += delta * PC.walk_speed;
 		}
 
 		if (dx != 0 || dy != 0) {
@@ -189,7 +187,7 @@ public class Game {
 			if (!checkBB(playerbb)) {
 				dy = 0;
 			}
-			player.tick(delta);
+			player.walkTick(delta);
 			player.setTecladoState(izq, arr, der, aba);
 		}
 		if (dx != 0 || dy != 0) {

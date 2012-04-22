@@ -5,10 +5,6 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class Player extends PC {
 
-	private int walk_frame;//cols
-	private int walk_direction;//fils
-	private long deltaAcumulado;
-
 	public Player() {
 		this.left = 0;
 		this.top = 0;
@@ -59,19 +55,6 @@ public class Player extends PC {
 		glVertex2d(left + Tile.tile_width, top + Tile.tile_height);
 		glTexCoord2d(ntx + dx, nty);
 		glVertex2d(left + Tile.tile_width, top);
-	}
-
-	@Override
-	public void tick(long delta) {
-		//empty
-		deltaAcumulado += delta;
-		if (deltaAcumulado > 250) {
-			deltaAcumulado -= 250;
-			walk_frame++;
-			if (walk_frame >= 3) {
-				walk_frame = 0;
-			}
-		}
 	}
 
 	public void setTecladoState(boolean left, boolean up, boolean right, boolean down) {
