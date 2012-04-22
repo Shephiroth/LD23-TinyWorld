@@ -52,7 +52,7 @@ public class Weapon {
 
 	public Bullet fire() {
 		if (createBullet) {
-			return new Bullet();
+			return new Bullet(dmg);
 		}
 		return null;
 	}

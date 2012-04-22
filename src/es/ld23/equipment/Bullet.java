@@ -14,15 +14,24 @@ public class Bullet {
 	protected double mx, my;
 	protected int frameDir;
 	protected BBRectangle BB;
+	protected double dmg;
 
-	public Bullet() {
+	public Bullet(double dmg) {
 		this.x = 0;
 		this.y = 0;
+		this.dmg = dmg;
 		BB = new BBRectangle(0, 0, 24, 24);
 		tx = 0;
 		ty = dy * 4;
 	}
-	public BBRectangle getBB(){return BB;}
+
+	public double getDmg() {
+		return dmg;
+	}
+
+	public BBRectangle getBB() {
+		return BB;
+	}
 
 	public void setLocation(double x, double y) {
 		this.x = x;
@@ -31,7 +40,7 @@ public class Bullet {
 	}
 
 	public void setDirection(int dir) {
-		double recto = PC.walk_speed*1.4;
+		double recto = PC.walk_speed * 1.4;
 		double diagonal = recto * PC.diagonal_change;
 		switch (dir) {
 			case PC.PC_DIA_ABADER:
@@ -92,11 +101,11 @@ public class Bullet {
 	}
 
 	public void tick(long delta) {
-		double nx = mx*delta;
-		double ny = my*delta;
-		
-		x+=nx;
-		y+=ny;
+		double nx = mx * delta;
+		double ny = my * delta;
+
+		x += nx;
+		y += ny;
 		BB.move(nx, ny);
 	}
 }

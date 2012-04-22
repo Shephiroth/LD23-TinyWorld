@@ -7,7 +7,7 @@ import org.newdawn.slick.TrueTypeFont;
 public class Zombie extends PC {
 
 	private int nivel = 0;
-	private int hp = 0;
+	private double hp = 0;
 	private int lazyness = 0;
 	private boolean wantToMove = false;
 	private double dirx = 0;
@@ -61,6 +61,12 @@ public class Zombie extends PC {
 		}
 	}
 
+
+	@Override
+	public boolean hurt(double dmg) {
+		hp -= dmg;
+		return (hp<=0);
+	}
 	private void generaDireccion() {
 		int dir = Game.random.nextInt(8);
 		double recto = PC.walk_speed;

@@ -84,7 +84,7 @@ public abstract class PC {
 	public void cancelMovement(long delta) {
 	}
 	
-	public boolean hurt(int dmg) {
+	public boolean hurt(double dmg) {
 		return false;
 	}
 

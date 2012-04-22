@@ -278,7 +278,7 @@ public class Game {
 			BBRectangle p = player.getBB();
 			for (PC mob : mobs) {
 				mob.tick(delta);
-				if (!checkBB(mob.getBB()) /**/|| mob.getBB().collision(p)/**/) {
+				if (!checkBB(mob.getBB()) || mob.getBB().collision(p)) {
 					mob.cancelMovement(delta);
 				}
 			}
@@ -293,6 +293,20 @@ public class Game {
 					b--;
 					console.addString("Bullet gone.", textoNormal);
 				}
+				if (!mobs.isEmpty()) {
+					for (int m = 0; m < mobs.size(); m++) {
+						PC mob = mobs.get(m);
+						if (mob.getBB().collision(bullet.getBB())) {
+							if (mob.hurt(bullet.getDmg())) {
+								mobs.remove(m);
+							}
+							bullets.remove(b);
+							b--;
+							m = mobs.size();
+							impacto.playAsSoundEffect(1, 1, false);
+						}
+					}
+				}
 			}
 		}
 
@@ -303,7 +317,8 @@ public class Game {
 					Mouse.setGrabbed(false);
 					Mouse.setCursorPosition(punteroLocation.getX(), punteroLocation.getY());
 				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_SPACE) {
+				if (Keyboard.getEventKey() == Keyboard.KEY_SPACE ||
+					Keyboard.getEventKey() == Keyboard.KEY_LCONTROL) {
 					Weapon arma = player.getWeapon();
 					if (arma != null) {
 						Bullet b = arma.fire();
