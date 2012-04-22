@@ -12,6 +12,7 @@ public class Map {
 	public static boolean map_1 = false;
 	public static boolean map_2 = false;
 	public static boolean map_3 = false;
+	public static boolean map_4 = false;
 	private int map_f;
 	private int map_c;
 	private Tile tiles[];
@@ -211,6 +212,9 @@ public class Map {
 				break;
 			case 2:
 				map_3 = true;
+				break;
+			case 3:
+				map_4=true;
 				break;
 		}
 	}

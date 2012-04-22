@@ -59,7 +59,10 @@ public class Player extends PC {
 
 	@Override
 	public boolean hurt(double dmg) {
-		hp -= dmg;
+		dmg -= getDefense();
+		if (dmg > 0) {
+			hp -= dmg;
+		}
 		return hp <= 0;
 	}
 

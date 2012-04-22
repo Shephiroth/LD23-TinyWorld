@@ -98,7 +98,7 @@ public class Game {
 		awtFont = new Font("Times New Roman", Font.BOLD, 24);
 		bigfont = new TrueTypeFont(awtFont, true);
 		textoNormal = Color.green.brighter();
-		menuMapOptions = new Rectangle(85, 325, bigfont.getWidth("Map 1 : 24x24"), bigfont.getLineHeight() * 8);
+		menuMapOptions = new Rectangle(85, 325, bigfont.getWidth("Map 1 : 24x24"), bigfont.getLineHeight() * 10);
 		rectWeapon = new Rectangle(width - 178, 177, 48, 48);
 		rectArrow = new Rectangle(width - 124, 177, 48, 48);
 		rectArmor = new Rectangle(width - 70, 177, 48, 48);
@@ -115,9 +115,9 @@ public class Game {
 		gameover = true;
 
 		arrShop = player.getArrowInt() + 1;
-		arrShopPrize = arrShop * arrShop * 250;
+		arrShopPrize = arrShop * arrShop * arrShop * 250;
 		defShop = player.getArmorInt() + 1;
-		defShopPrize = defShop * defShop * 250;
+		defShopPrize = defShop * defShop * defShop * 250;
 	}
 
 	private void juegoNuevo(int f, int c) {
@@ -316,48 +316,79 @@ public class Game {
 									select.playAsSoundEffect(1, 1, false);
 									break;
 								case 1:
+									if (!Map.map_1) {
+										console.addString("Level not open yet. WORK HARDER!!!", textoNormal);
+										break;
+									}
 									console.addString("You clicked 20x20", textoNormal);
 									juegoNuevo(20, 20);
 									select.playAsSoundEffect(1, 1, false);
 									break;
 								case 2:
+									if (!Map.map_2) {
+										console.addString("Level not open yet. WORK HARDER!!!", textoNormal);
+										break;
+									}
 									console.addString("You clicked 16x16", textoNormal);
 									juegoNuevo(16, 16);
 									select.playAsSoundEffect(1, 1, false);
 									break;
 								case 3:
+									if (!Map.map_3) {
+										console.addString("Level not open yet. WORK HARDER!!!", textoNormal);
+										break;
+									}
 									console.addString("You clicked 12x12", textoNormal);
 									juegoNuevo(12, 12);
 									select.playAsSoundEffect(1, 1, false);
 									break;
+								case 4:
+									if (Map.map_4) {
+										console.addString("You clicked 8x8", textoNormal);
+										juegoNuevo(8, 8);
+										select.playAsSoundEffect(1, 1, false);
+									}
+									break;
 							}
 						}
-						if (defShopPrize > 0 && defShopRect.contains(x, y)) {
-							if (player.getGold() >= defShopPrize) {
+						if (defShopRect.contains(x, y)) {
+							if (defShopPrize == 0) {
+								console.addString("Sorry, you are maxed.", textoNormal);
+							} else if (player.getGold() >= defShopPrize) {
 								player.setArmor(defShop);
 								player.removeGold(defShopPrize);
 								shop.playAsSoundEffect(1, 1, false);
 								defShop++;
 								if (defShop < Armor.armors.length) {
-									defShopPrize = defShop * defShop * 250;
+									defShopPrize = defShop * defShop * defShop * 250;
+									console.addString("Defense Upgraded", textoNormal);
 								} else {
+									console.addString("Good job!!! Defense Maxed", textoNormal);
 									defShop--;
 									defShopPrize = 0;
 								}
+							} else {
+								console.addString("No money, no upgrade :(.", textoNormal);
 							}
 						}
-						if (arrShopPrize > 0 && arrShopRect.contains(x, y)) {
-							if (player.getGold() >= arrShopPrize) {
+						if (arrShopRect.contains(x, y)) {
+							if (arrShopPrize == 0) {
+								console.addString("Sorry, you are maxed.", textoNormal);
+							} else if (player.getGold() >= arrShopPrize) {
 								player.setArrow(arrShop);
 								player.removeGold(arrShopPrize);
 								shop.playAsSoundEffect(1, 1, false);
 								arrShop++;
 								if (arrShop < Arrow.arrows.length) {
 									arrShopPrize = arrShop * arrShop * 250;
+									console.addString("Weapon Upgraded", textoNormal);
 								} else {
+									console.addString("Good job!!! Weapon Maxed", textoNormal);
 									arrShop--;
 									arrShopPrize = 0;
 								}
+							} else {
+								console.addString("No money, no upgrade :(.", textoNormal);
 							}
 						}
 					}
@@ -520,8 +551,11 @@ public class Game {
 							gameoverDelay = 2000;
 							explosion.playAsSoundEffect(1, 1, false);
 						} else {
-							console.addString(bullet.getDmg() + " dmg points.", textoNormal);
-							damage.playAsSoundEffect(1, 1, false);
+							double dmg = bullet.getDmg() - player.getDefense();
+							if (dmg > 0) {
+								console.addString(bullet.getDmg() + " dmg points.", textoNormal);
+								damage.playAsSoundEffect(1, 1, false);
+							}
 						}
 						bulletsEnemigas.remove(b);
 						b = bulletsEnemigas.size();
@@ -634,6 +668,9 @@ public class Game {
 			bigfont.drawString(menuMapOptions.x, menuMapOptions.y + bigfont.getLineHeight() * 3 / 2, "Map 2 : 20x20", Map.map_1 ? Color.white : c);
 			bigfont.drawString(menuMapOptions.x, menuMapOptions.y + bigfont.getLineHeight() * 3, "Map 3 : 16x16", Map.map_2 ? Color.white : c);
 			bigfont.drawString(menuMapOptions.x, menuMapOptions.y + bigfont.getLineHeight() * 9 / 2, "Map 4 : 12x12", Map.map_3 ? Color.white : c);
+			if (Map.map_4) {
+				bigfont.drawString(menuMapOptions.x, menuMapOptions.y + bigfont.getLineHeight() * 6, "Map 5 :  8x 8", Color.white);
+			}
 		}
 	}
 }
