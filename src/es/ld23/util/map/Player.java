@@ -1,5 +1,6 @@
 package es.ld23.util.map;
 
+import es.ld23.equipment.Bullet;
 import es.ld23.equipment.Weapon;
 import es.ld23.util.BBRectangle;
 import static org.lwjgl.opengl.GL11.*;
@@ -7,6 +8,7 @@ import static org.lwjgl.opengl.GL11.*;
 public class Player extends PC {
 
 	private Weapon arma;
+	private double hp;
 	private int score;
 
 	public Player() {
@@ -21,6 +23,7 @@ public class Player extends PC {
 
 		this.arma = Weapon.bow;
 		this.score = 0;
+		this.hp = 50;
 	}
 
 	public void addScore(int puntos) {
@@ -29,6 +32,12 @@ public class Player extends PC {
 
 	public int getScore() {
 		return score;
+	}
+
+	@Override
+	public boolean hurt(double dmg) {
+		hp -= dmg;
+		return false;
 	}
 
 	public Weapon getWeapon() {
@@ -41,13 +50,6 @@ public class Player extends PC {
 		}
 	}
 
-	public double getX() {
-		return left;
-	}
-
-	public double getY() {
-		return top;
-	}
 
 	public double getCameraY(int height, int h) {
 		double half = (height - Tile.tile_height) / 2.0;
@@ -75,21 +77,6 @@ public class Player extends PC {
 		return (int) -res;
 	}
 
-	public void render2() {
-		double ntx = tx + dx * walk_frame;
-		double nty = ty + dy * walk_direction;
-
-
-		glTexCoord2d(ntx, nty);
-		glVertex2d(left, top);
-		glTexCoord2d(ntx, nty + dy);
-		glVertex2d(left, top + Tile.tile_height);
-		glTexCoord2d(ntx + dx, nty + dy);
-		glVertex2d(left + Tile.tile_width, top + Tile.tile_height);
-		glTexCoord2d(ntx + dx, nty);
-		glVertex2d(left + Tile.tile_width, top);
-	}
-
 	public void setTecladoState(boolean left, boolean up, boolean right, boolean down) {
 		if (left) {
 			this.walk_direction = PC.PC_MOVE_IZQ;
@@ -100,5 +87,14 @@ public class Player extends PC {
 		} else if (up) {
 			this.walk_direction = PC.PC_MOVE_ARR;
 		}
+	}
+
+	public Bullet fire() {
+		this.delay = arma.getDelay();
+		return arma.fire();
+	}
+
+	public double getHP() {
+		return hp;
 	}
 }

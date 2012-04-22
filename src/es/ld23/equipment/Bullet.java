@@ -31,6 +31,10 @@ public class Bullet {
 		return dmg;
 	}
 
+	public void upgrade() {
+		ty = dy * 5;
+	}
+
 	public BBRectangle getBB() {
 		return BB;
 	}
@@ -111,7 +115,7 @@ public class Bullet {
 		x += nx;
 		y += ny;
 		BB.move(nx, ny);
-		
+
 		return (deltaTime > 0);
 	}
 }

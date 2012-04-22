@@ -1,5 +1,6 @@
 package es.ld23.util.map;
 
+import es.ld23.equipment.Bullet;
 import es.ld23.util.BBRectangle;
 import static org.lwjgl.opengl.GL11.*;
 import org.newdawn.slick.Color;
@@ -27,6 +28,9 @@ public abstract class PC {
 	protected int walk_frame;//cols
 	protected int walk_direction;//fils
 	protected long deltaAcumulado;
+	//shooting
+	protected int delay;
+	protected int shootDelay;
 
 	protected PC() {
 	}
@@ -51,6 +55,14 @@ public abstract class PC {
 
 	public BBRectangle getBB() {
 		return BB;
+	}
+
+	public double getX() {
+		return left;
+	}
+
+	public double getY() {
+		return top;
 	}
 
 	public void setTextureFil(int fil, int max_fil) {
@@ -78,12 +90,9 @@ public abstract class PC {
 		glVertex2d(left + Tile.tile_width, top);
 	}
 
-	public void tick(long delta) {
-	}
-
 	public void cancelMovement(long delta) {
 	}
-	
+
 	public boolean hurt(double dmg) {
 		return false;
 	}
@@ -105,5 +114,21 @@ public abstract class PC {
 
 	public int getScore() {
 		return 0;
+	}
+
+	public boolean canShoot() {
+		return delay <= 0;
+	}
+
+	public void tick(long delta) {
+		delay -= delta;
+	}
+
+	public Bullet fire() {
+		delay = shootDelay;
+		return null;
+	}
+	public void fakeFire() {
+		delay = shootDelay;
 	}
 }

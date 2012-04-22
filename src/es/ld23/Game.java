@@ -46,7 +46,7 @@ public class Game {
 	private Player player;
 	private ArrayList<PC> mobs;
 	private ArrayList<Bullet> bullets;
-	private int bulletDelay;
+	private ArrayList<Bullet> bulletsEnemigas;
 	//recursos
 	private TrueTypeFont font;
 	private Texture puntero;
@@ -85,7 +85,7 @@ public class Game {
 		player = new Player();
 		mobs = new ArrayList<PC>();
 		bullets = new ArrayList<Bullet>();
-		bulletDelay = 0;
+		bulletsEnemigas = new ArrayList<Bullet>();
 		for (int i = 0; i < 20; i++) {
 			mobs.add(new Zombie(map.getWidth(), map.getHeight()));
 		}
@@ -159,13 +159,20 @@ public class Game {
 	}
 
 	private void renderBullets() {
-		if (bullets.isEmpty()) {
+		if (bullets.isEmpty() && bulletsEnemigas.isEmpty()) {
 			return;
 		}
 		glBegin(GL_QUADS);
 		{
-			for (Bullet bullet : bullets) {
-				bullet.render();
+			if (!bullets.isEmpty()) {
+				for (Bullet bullet : bullets) {
+					bullet.render();
+				}
+			}
+			if (!bulletsEnemigas.isEmpty()) {
+				for (Bullet bullet : bulletsEnemigas) {
+					bullet.render();
+				}
 			}
 		}
 		glEnd();
@@ -206,6 +213,7 @@ public class Game {
 		glDisable(GL_TEXTURE_2D);
 		glEnable(GL_BLEND);
 		font.drawString(width - 200, 205, "Score: " + player.getScore(), Color.blue);
+		font.drawString(width - 200, 205 + font.getLineHeight(), "HP: " + player.getHP(), Color.blue);
 		console.render();
 		textureItems.bind();
 		player.getWeapon().render(weaponRectangle);
@@ -215,9 +223,6 @@ public class Game {
 	public void tick(long delta) {
 		if (delta == 0) {
 			return;
-		}
-		if (bulletDelay > 0) {
-			bulletDelay -= delta;
 		}
 
 		boolean izq = Keyboard.isKeyDown(Keyboard.KEY_A) || Keyboard.isKeyDown(Keyboard.KEY_LEFT);
@@ -265,7 +270,7 @@ public class Game {
 			dy += delta * PC.walk_speed;
 			playerDir = PC.PC_MOVE_ABA;
 		}
-
+		player.tick(delta);
 		if (dx != 0 || dy != 0) {
 			BBRectangle playerbb = player.getBB().createMoved(dx, 0);
 			if (!checkBB(playerbb)) {
@@ -287,6 +292,11 @@ public class Game {
 				mob.tick(delta);
 				if (!checkBB(mob.getBB()) || mob.getBB().collision(p)) {
 					mob.cancelMovement(delta);
+				}
+				if (mob.canShoot()) {
+					if (Game.random.nextDouble()>0.9)
+					bulletsEnemigas.add(mob.fire());
+					else mob.fakeFire();
 				}
 			}
 		}
@@ -320,6 +330,26 @@ public class Game {
 				}
 			}
 		}
+		if (!bulletsEnemigas.isEmpty()) {
+			BBRectangle mapBB = map.getBB();
+			for (int b = 0; b < bulletsEnemigas.size(); b++) {
+				Bullet bullet = bulletsEnemigas.get(b);
+				if (bullet.tick(delta)) {
+					if (!mapBB.isInside(bullet.getBB())) {
+						bulletsEnemigas.remove(b);
+						b--;
+					}
+					if (bullet.getBB().collision(player.getBB())) {
+						player.hurt(bullet.getDmg());
+						bulletsEnemigas.remove(b);
+						b = bulletsEnemigas.size();
+					}
+				} else {
+					bulletsEnemigas.remove(b);
+					b--;
+				}
+			}
+		}
 
 
 		while (Keyboard.next()) {
@@ -331,15 +361,14 @@ public class Game {
 				if (Keyboard.getEventKey() == Keyboard.KEY_SPACE
 					|| Keyboard.getEventKey() == Keyboard.KEY_LCONTROL) {
 					Weapon arma = player.getWeapon();
-					if (arma != null && bulletDelay <= 0) {
-						Bullet b = arma.fire();
+					if (arma != null && player.canShoot()) {
+						Bullet b = player.fire();
 						if (b != null) {
 							b.setLocation(player.getX(), player.getY());
 							b.setDirection(playerDir);
 							bullets.add(b);
 							disparo.playAsSoundEffect(1, 0.8f, false);
 						}
-						bulletDelay = arma.getDelay();
 					}
 				}
 				if (Keyboard.getEventKey() == Keyboard.KEY_F1) {
