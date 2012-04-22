@@ -184,7 +184,7 @@ public class Map {
 
 	public void findSpawLocation(PC m, ArrayList<PC> mobs) {
 		BBRectangle base = m.getBB();
-		double x,y;
+		double x, y;
 		boolean found;
 		do {
 			found = false;
@@ -192,10 +192,26 @@ public class Map {
 			y = Game.random.nextDouble() * map_h;
 			base.moveTo(x, y);
 			for (PC pc : mobs) {
-				if (pc.getBB().collision(base))
+				if (pc.getBB().collision(base)) {
 					found = true;
+				}
 			}
 		} while (found || !isFree(base));
 		m.moveTo(x, y);
+	}
+
+	public void openNextLevel() {
+		int level = (24 - map_f) / 4;
+		switch (level) {
+			case 0:
+				map_1 = true;
+				break;
+			case 1:
+				map_2 = true;
+				break;
+			case 2:
+				map_3 = true;
+				break;
+		}
 	}
 }

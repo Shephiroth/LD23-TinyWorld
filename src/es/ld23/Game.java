@@ -59,9 +59,11 @@ public class Game {
 	private Texture textureTiles;
 	private Texture textureTitulos;
 	private Audio explosion;
+	private Audio damage;
 	private Audio disparo;
 	private Audio impacto;
 	private Audio salto;
+	private Audio select;
 
 	static public void textureInfo(Texture target) {
 		System.out.println("Texture info: " + target.getTextureRef());
@@ -138,6 +140,8 @@ public class Game {
 			textureTitulos = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/titulos.png"));
 			explosion = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/explosion.wav"));
 			salto = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/jump.wav"));
+			select = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/select.wav"));
+			damage = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/damage.wav"));
 			disparo = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/disparo.wav"));
 			impacto = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/disparo_impacto.wav"));
 		} catch (IOException ex) {
@@ -237,8 +241,15 @@ public class Game {
 		glCallList(list);
 		glDisable(GL_TEXTURE_2D);
 		glEnable(GL_BLEND);
-		font.drawString(width - 200, 205, "Score: " + player.getScore(), Color.blue);
-		font.drawString(width - 200, 205 + font.getLineHeight(), "HP: " + player.getHP(), Color.blue);
+		int left = width - 180;
+		int right = left + font.getWidth("Score: 999999  ");
+		font.drawString(left, 205, "Score: " + player.getScore(), Color.blue);
+		font.drawString(right, 205, "Gold: " + player.getGold(), Color.blue);
+		font.drawString(left, 205 + font.getLineHeight(), "HP: " + player.getHP(), Color.blue);
+		font.drawString(right, 205 + font.getLineHeight(), "Att: " + player.getWeapon().getDmg(), Color.blue);
+		font.drawString(left, 205 + font.getLineHeight() * 2, "EXP: " + player.getExp() + "/" + player.getNextExp(), Color.blue);
+		font.drawString(right, 205 + font.getLineHeight() * 2, "Speed: " + (1000.0 / player.getWeapon().getDelay()) + "/" + player.getNextExp(), Color.blue);
+//		font.drawString(right, 205 + font.getLineHeight()*2, "Def: " + player.getDefense().getDef()+"/"+player.getNextExp(), Color.blue);
 		console.render();
 		textureItems.bind();
 		player.getWeapon().render(weaponRectangle);
@@ -273,18 +284,22 @@ public class Game {
 								case 0:
 									console.addString("You clicked 24x24", textoNormal);
 									juegoNuevo(24, 24);
+									select.playAsSoundEffect(1, 1, false);
 									break;
 								case 1:
-									console.addString("You clicked 22x22", textoNormal);
+									console.addString("You clicked 20x20", textoNormal);
 									juegoNuevo(20, 20);
+									select.playAsSoundEffect(1, 1, false);
 									break;
 								case 2:
-									console.addString("You clicked 20x20", textoNormal);
+									console.addString("You clicked 16x16", textoNormal);
 									juegoNuevo(16, 16);
+									select.playAsSoundEffect(1, 1, false);
 									break;
 								case 3:
-									console.addString("You clicked 16x16", textoNormal);
+									console.addString("You clicked 12x12", textoNormal);
 									juegoNuevo(12, 12);
+									select.playAsSoundEffect(1, 1, false);
 									break;
 							}
 						}
@@ -307,6 +322,8 @@ public class Game {
 		boolean der = Keyboard.isKeyDown(Keyboard.KEY_D) || Keyboard.isKeyDown(Keyboard.KEY_RIGHT);
 		boolean arr = Keyboard.isKeyDown(Keyboard.KEY_W) || Keyboard.isKeyDown(Keyboard.KEY_UP);
 		boolean aba = Keyboard.isKeyDown(Keyboard.KEY_S) || Keyboard.isKeyDown(Keyboard.KEY_DOWN);
+		boolean action = Keyboard.isKeyDown(Keyboard.KEY_SPACE) || Keyboard.isKeyDown(Keyboard.KEY_LCONTROL);
+
 		if (izq && der) {
 			izq = der = false;
 		}
@@ -380,6 +397,18 @@ public class Game {
 				}
 			}
 		}
+		if (action && player.canShoot()) {
+			Weapon arma = player.getWeapon();
+			if (arma != null) {
+				Bullet b = player.fire();
+				if (b != null) {
+					b.setLocation(player.getX(), player.getY());
+					b.setDirection(playerDir);
+					bullets.add(b);
+					disparo.playAsSoundEffect(1, 0.8f, false);
+				}
+			}
+		}
 		if (!bullets.isEmpty()) {
 			BBRectangle mapBB = map.getBB();
 			for (int b = 0; b < bullets.size(); b++) {
@@ -403,6 +432,12 @@ public class Game {
 								impacto.playAsSoundEffect(1, 1, false);
 							}
 						}
+						if (mobs.isEmpty()) {
+							//last mob die
+							map.openNextLevel();
+							gameover = true;
+							player.updateStat();
+						}
 					}
 				} else {
 					bullets.remove(b);
@@ -423,7 +458,9 @@ public class Game {
 						if (player.hurt(bullet.getDmg())) {
 							gameover = true;
 							gameoverDelay = 2000;
-							this.explosion.playAsSoundEffect(1, 1, false);
+							explosion.playAsSoundEffect(1, 1, false);
+						} else {
+							damage.playAsSoundEffect(1, 1, false);
 						}
 						bulletsEnemigas.remove(b);
 						b = bulletsEnemigas.size();
@@ -439,19 +476,6 @@ public class Game {
 				if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
 					Mouse.setGrabbed(false);
 					Mouse.setCursorPosition(punteroLocation.getX(), punteroLocation.getY());
-				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_SPACE
-					|| Keyboard.getEventKey() == Keyboard.KEY_LCONTROL) {
-					Weapon arma = player.getWeapon();
-					if (arma != null && player.canShoot()) {
-						Bullet b = player.fire();
-						if (b != null) {
-							b.setLocation(player.getX(), player.getY());
-							b.setDirection(playerDir);
-							bullets.add(b);
-							disparo.playAsSoundEffect(1, 0.8f, false);
-						}
-					}
 				}
 				if (Keyboard.getEventKey() == Keyboard.KEY_F1) {
 					explosion.playAsMusic(1, 1, false);
@@ -546,9 +570,9 @@ public class Game {
 			glDisable(GL_TEXTURE_2D);
 			glColor3d(1, 1, 1);
 			bigfont.drawString(menuMapOptions.x, menuMapOptions.y, "Map 1 : 24x24");
-			bigfont.drawString(menuMapOptions.x, menuMapOptions.y + bigfont.getLineHeight() * 3 / 2, "Map 2 : 22x22", Map.map_1 ? Color.white : c);
-			bigfont.drawString(menuMapOptions.x, menuMapOptions.y + bigfont.getLineHeight() * 3, "Map 3 : 20x20", Map.map_2 ? Color.white : c);
-			bigfont.drawString(menuMapOptions.x, menuMapOptions.y + bigfont.getLineHeight() * 9 / 2, "Map 4 : 16x16", Map.map_3 ? Color.white : c);
+			bigfont.drawString(menuMapOptions.x, menuMapOptions.y + bigfont.getLineHeight() * 3 / 2, "Map 2 : 20x20", Map.map_1 ? Color.white : c);
+			bigfont.drawString(menuMapOptions.x, menuMapOptions.y + bigfont.getLineHeight() * 3, "Map 3 : 16x16", Map.map_2 ? Color.white : c);
+			bigfont.drawString(menuMapOptions.x, menuMapOptions.y + bigfont.getLineHeight() * 9 / 2, "Map 4 : 12x12", Map.map_3 ? Color.white : c);
 		}
 	}
 }

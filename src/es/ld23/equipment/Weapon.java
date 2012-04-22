@@ -8,7 +8,7 @@ public class Weapon {
 	private static final double ty_top = 48.0 / 256.0;
 	public static final double dy = 24.0 / 256.0;
 	public static final double dx = 24.0 / 256.0;
-	public static final Weapon bow = new Weapon(0, true, 20,10,350);
+	public static final Weapon bow = new Weapon(0, true, 20, 10, 350);
 	private boolean createBullet;
 	private double dmg;
 	private int delay;
@@ -18,7 +18,7 @@ public class Weapon {
 	public Weapon(int weaponCol, boolean createBullet, double dmg, int deltaTime, int delay) {
 		this.dmg = dmg;
 		this.createBullet = createBullet;
-		this.deltaTime = deltaTime*100;
+		this.deltaTime = deltaTime * 100;
 		this.weaponCol = weaponCol;
 		this.delay = delay;
 	}
@@ -58,5 +58,9 @@ public class Weapon {
 		}
 		return null;
 	}
-	public int getDelay() {return delay;}
+
+	public int getDelay() {
+		return delay;
+	}
+	public double getDmg() {return dmg;}
 }

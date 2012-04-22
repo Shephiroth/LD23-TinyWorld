@@ -9,6 +9,7 @@ public class Player extends PC {
 	private int nivel;
 	private Weapon arma;
 	private double hp;
+	private int exp;
 	private int score;
 	private int gold;
 
@@ -25,6 +26,14 @@ public class Player extends PC {
 		this.hp = 10;
 	}
 
+	public void updateStat() {
+		gold += score / 10;
+		exp += score;
+		if (exp > 1000 * nivel) {
+			exp -= 100 * nivel;
+			nivel++;
+		}
+	}
 	public final void start() {
 		left = 0;
 		top = 0;
@@ -58,7 +67,9 @@ public class Player extends PC {
 	}
 
 	public double getCameraY(int height, int h) {
-		if (height > h) return (height-h)/2;
+		if (height > h) {
+			return (height - h) / 2;
+		}
 		double half = (height - Tile.tile_height) / 2.0;
 		double max = h - height + half;
 		double res = top - half;
@@ -72,7 +83,9 @@ public class Player extends PC {
 	}
 
 	public double getCameraX(int width, int w) {
-		if (width > w) return (width-w)/2;
+		if (width > w) {
+			return (width - w) / 2;
+		}
 		double half = (width - Tile.tile_width) / 2.0;
 		double max = w - width + half;
 		double res = left - half;
@@ -105,4 +118,17 @@ public class Player extends PC {
 	public double getHP() {
 		return hp;
 	}
+
+	public int getExp() {
+		return exp;
+	}
+
+	public int getNextExp() {
+		return nivel * 1000;
+	}
+
+	public int getGold() {
+		return gold;
+	}
+
 }
