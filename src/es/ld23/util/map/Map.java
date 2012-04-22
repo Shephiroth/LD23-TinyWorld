@@ -143,13 +143,13 @@ public class Map {
 		}
 	}
 
-	public boolean isFree(BBRectangle playerBB) {
-		if (!mapBB.isInside(playerBB)) {
+	public boolean isFree(BBRectangle targetBB) {
+		if (!mapBB.isInside(targetBB)) {
 			return false;
 		}
 		if (!boundingbox.isEmpty()) {
 			for (BBRectangle aux : boundingbox) {
-				if (playerBB.collision(aux)) {
+				if (targetBB.collision(aux)) {
 					return false;
 				}
 			}
@@ -159,6 +159,10 @@ public class Map {
 
 	private void createBB(int f, int c) {
 		boundingbox.add(new BBRectangle(c * Tile.tile_width, f * Tile.tile_height, Tile.tile_width, Tile.tile_height));
+	}
+
+	public BBRectangle getBB() {
+		return mapBB;
 	}
 
 	public int getWidth() {

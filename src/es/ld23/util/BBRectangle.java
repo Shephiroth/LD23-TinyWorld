@@ -22,6 +22,9 @@ public class BBRectangle {
 			|| top > other.top + other.height || other.top > top + height) {
 			return false;
 		}
+		if (is(other)) {
+			return false;
+		}
 
 		return true;
 	}
@@ -48,6 +51,7 @@ public class BBRectangle {
 		left = x;
 		top = y;
 	}
+
 	public BBRectangle createMoved(double dx, double dy) {
 		return new BBRectangle(left + dx, top + dy, width, height);
 	}
@@ -67,5 +71,4 @@ public class BBRectangle {
 	public void render() {
 		render(Color.red);
 	}
-
 }

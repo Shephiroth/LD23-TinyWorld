@@ -22,6 +22,7 @@ public class Bullet {
 		tx = 0;
 		ty = dy * 4;
 	}
+	public BBRectangle getBB(){return BB;}
 
 	public void setLocation(double x, double y) {
 		this.x = x;

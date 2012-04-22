@@ -54,6 +54,7 @@ public class Game {
 	private Texture textureMobs;
 	private Audio explosion;
 	private Audio disparo;
+	private Audio impacto;
 	private Audio salto;
 
 	static public void textureInfo(Texture target) {
@@ -113,7 +114,8 @@ public class Game {
 			textureMobs = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/mobs.png"));
 			explosion = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/explosion.wav"));
 			salto = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/jump.wav"));
-			disparo = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/bullet.wav"));
+			disparo = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/disparo.wav"));
+			impacto = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/disparo_impacto.wav"));
 		} catch (IOException ex) {
 			Game.debug("Game::loadResources  ->  " + ex.getMessage());
 		}
@@ -273,13 +275,24 @@ public class Game {
 			player.move(dx, dy);
 		}
 		if (!mobs.isEmpty()) {
+			BBRectangle p = player.getBB();
 			for (PC mob : mobs) {
 				mob.tick(delta);
+				if (!checkBB(mob.getBB()) /**/|| mob.getBB().collision(p)/**/) {
+					mob.cancelMovement(delta);
+				}
 			}
 		}
 		if (!bullets.isEmpty()) {
-			for (Bullet bullet : bullets) {
+			BBRectangle mapBB = map.getBB();
+			for (int b = 0; b < bullets.size(); b++) {
+				Bullet bullet = bullets.get(b);
 				bullet.tick(delta);
+				if (!mapBB.isInside(bullet.getBB())) {
+					bullets.remove(b);
+					b--;
+					console.addString("Bullet gone.", textoNormal);
+				}
 			}
 		}
 
@@ -298,7 +311,7 @@ public class Game {
 							b.setLocation(player.getX(), player.getY());
 							b.setDirection(playerDir);
 							bullets.add(b);
-							disparo.playAsSoundEffect(1, 1, false);
+							disparo.playAsSoundEffect(1, 0.8f, false);
 						}
 					}
 				}
@@ -330,18 +343,17 @@ public class Game {
 		punteroLocation.setLocation(Mouse.getX(), Mouse.getY());
 	}
 
-	private boolean checkBB(BBRectangle playerbb) {
-		if (!map.isFree(playerbb)) {
+	private boolean checkBB(BBRectangle targetBB) {
+		if (!map.isFree(targetBB)) {
 			return false;
 		}
 		if (!mobs.isEmpty()) {
 			for (PC mob : mobs) {
-				if (mob.getBB().collision(playerbb)) {
+				if (mob.getBB().collision(targetBB)) {
 					return false;
 				}
 			}
 		}
-
 		return true;
 	}
 

@@ -50,6 +50,17 @@ public class Zombie extends PC {
 		}
 	}
 
+	public void cancelMovement(long delta) {
+		if (wantToMove) {
+			lazyness += Game.random.nextInt(250) + 500;
+			wantToMove = false;
+			double movex = dirx * delta;
+			double movey = diry * delta;
+			move(-movex, -movey);
+			dirx = diry = 0;
+		}
+	}
+
 	private void generaDireccion() {
 		int dir = Game.random.nextInt(8);
 		double recto = PC.walk_speed;

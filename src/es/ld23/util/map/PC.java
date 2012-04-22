@@ -81,6 +81,13 @@ public abstract class PC {
 	public void tick(long delta) {
 	}
 
+	public void cancelMovement(long delta) {
+	}
+	
+	public boolean hurt(int dmg) {
+		return false;
+	}
+
 	public void walkTick(long delta) {
 		//empty
 		deltaAcumulado += delta;
