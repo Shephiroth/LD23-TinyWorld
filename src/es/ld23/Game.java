@@ -38,6 +38,7 @@ public class Game {
 	private boolean listRebuild = true;
 	private int list;
 	private Rectangle weaponRectangle;
+	private int playerDir;
 	//propios
 	private Console console;
 	private Color textoNormal;
@@ -52,6 +53,7 @@ public class Game {
 	private Texture textureTiles;
 	private Texture textureMobs;
 	private Audio explosion;
+	private Audio disparo;
 	private Audio salto;
 
 	static public void textureInfo(Texture target) {
@@ -109,8 +111,9 @@ public class Game {
 			textureTiles = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/tiles.png"), GL_NEAREST);
 			textureItems = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/items.png"));
 			textureMobs = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/mobs.png"));
-			explosion = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/Explosion.wav"));
-			salto = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/Jump.wav"));
+			explosion = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/explosion.wav"));
+			salto = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/jump.wav"));
+			disparo = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("res/bullet.wav"));
 		} catch (IOException ex) {
 			Game.debug("Game::loadResources  ->  " + ex.getMessage());
 		}
@@ -224,26 +227,34 @@ public class Game {
 			if (arr) {
 				dx -= delta * PC.walk_speed * PC.diagonal_change;
 				dy -= delta * PC.walk_speed * PC.diagonal_change;
+				playerDir = PC.PC_DIA_ARRIZQ;
 			} else if (aba) {
 				dx -= delta * PC.walk_speed * PC.diagonal_change;
 				dy += delta * PC.walk_speed * PC.diagonal_change;
+				playerDir = PC.PC_DIA_ABAIZQ;
 			} else {
 				dx -= delta * PC.walk_speed;
+				playerDir = PC.PC_MOVE_IZQ;
 			}
 		} else if (der) {
 			if (arr) {
 				dx += delta * PC.walk_speed * PC.diagonal_change;
 				dy -= delta * PC.walk_speed * PC.diagonal_change;
+				playerDir = PC.PC_DIA_ARRDER;
 			} else if (aba) {
 				dx += delta * PC.walk_speed * PC.diagonal_change;
 				dy += delta * PC.walk_speed * PC.diagonal_change;
+				playerDir = PC.PC_DIA_ABADER;
 			} else {
 				dx += delta * PC.walk_speed;
+				playerDir = PC.PC_MOVE_DER;
 			}
 		} else if (arr) {
 			dy -= delta * PC.walk_speed;
+			playerDir = PC.PC_MOVE_ARR;
 		} else if (aba) {
 			dy += delta * PC.walk_speed;
+			playerDir = PC.PC_MOVE_ABA;
 		}
 
 		if (dx != 0 || dy != 0) {
@@ -285,7 +296,9 @@ public class Game {
 						Bullet b = arma.fire();
 						if (b != null) {
 							b.setLocation(player.getX(), player.getY());
+							b.setDirection(playerDir);
 							bullets.add(b);
+							disparo.playAsSoundEffect(1, 1, false);
 						}
 					}
 				}
@@ -297,6 +310,7 @@ public class Game {
 				}
 				if (Keyboard.getEventKey() == Keyboard.KEY_F5) {
 					mobs.clear();
+					bullets.clear();
 					map.nuevo();
 					for (int i = 0; i < 400; i++) {
 						mobs.add(new Zombie(map.getWidth(), map.getHeight()));

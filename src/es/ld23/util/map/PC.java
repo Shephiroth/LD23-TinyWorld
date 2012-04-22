@@ -13,7 +13,7 @@ public abstract class PC {
 	public static final int PC_MOVE_ARR = 3;
 	public static final int PC_MOVE_EMPTY = 4;
 	public static final int PC_DIA_ARRIZQ = 4;
-	public static final int PC_DIA_ABBIZQ = 5;
+	public static final int PC_DIA_ABAIZQ = 5;
 	public static final int PC_DIA_ARRDER = 6;
 	public static final int PC_DIA_ABADER = 7;
 	public static final double walk_speed = 0.27;
