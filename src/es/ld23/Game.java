@@ -42,6 +42,7 @@ public class Game {
 	private int playerDir;
 	private int gameoverDelay = -2;
 	private boolean gameover;
+	private float sonido = 0.1f;
 	//propios
 	private Rectangle menuMapOptions;
 	private Rectangle rectWeapon;
@@ -313,7 +314,7 @@ public class Game {
 								case 0:
 									console.addString("You clicked 24x24", textoNormal);
 									juegoNuevo(24, 24);
-									select.playAsSoundEffect(1, 1, false);
+									select.playAsSoundEffect(1, sonido, false);
 									break;
 								case 1:
 									if (!Map.map_1) {
@@ -322,7 +323,7 @@ public class Game {
 									}
 									console.addString("You clicked 20x20", textoNormal);
 									juegoNuevo(20, 20);
-									select.playAsSoundEffect(1, 1, false);
+									select.playAsSoundEffect(1, sonido, false);
 									break;
 								case 2:
 									if (!Map.map_2) {
@@ -331,7 +332,7 @@ public class Game {
 									}
 									console.addString("You clicked 16x16", textoNormal);
 									juegoNuevo(16, 16);
-									select.playAsSoundEffect(1, 1, false);
+									select.playAsSoundEffect(1, sonido, false);
 									break;
 								case 3:
 									if (!Map.map_3) {
@@ -340,13 +341,13 @@ public class Game {
 									}
 									console.addString("You clicked 12x12", textoNormal);
 									juegoNuevo(12, 12);
-									select.playAsSoundEffect(1, 1, false);
+									select.playAsSoundEffect(1, sonido, false);
 									break;
 								case 4:
 									if (Map.map_4) {
 										console.addString("You clicked 8x8", textoNormal);
 										juegoNuevo(8, 8);
-										select.playAsSoundEffect(1, 1, false);
+										select.playAsSoundEffect(1, sonido, false);
 									}
 									break;
 							}
@@ -357,7 +358,7 @@ public class Game {
 							} else if (player.getGold() >= defShopPrize) {
 								player.setArmor(defShop);
 								player.removeGold(defShopPrize);
-								shop.playAsSoundEffect(1, 1, false);
+								shop.playAsSoundEffect(1, sonido, false);
 								defShop++;
 								if (defShop < Armor.armors.length) {
 									defShopPrize = defShop * defShop * defShop * 250;
@@ -377,7 +378,7 @@ public class Game {
 							} else if (player.getGold() >= arrShopPrize) {
 								player.setArrow(arrShop);
 								player.removeGold(arrShopPrize);
-								shop.playAsSoundEffect(1, 1, false);
+								shop.playAsSoundEffect(1, sonido, false);
 								arrShop++;
 								if (arrShop < Arrow.arrows.length) {
 									arrShopPrize = arrShop * arrShop * 250;
@@ -494,7 +495,7 @@ public class Game {
 					b.setLocation(player.getX(), player.getY());
 					b.setDirection(playerDir);
 					bullets.add(b);
-					disparo.playAsSoundEffect(1, 0.8f, false);
+					disparo.playAsSoundEffect(1,sonido, false);
 				}
 			}
 		}
@@ -519,7 +520,7 @@ public class Game {
 								bullets.remove(b);
 								b--;
 								m = mobs.size();
-								impacto.playAsSoundEffect(1, 1, false);
+								impacto.playAsSoundEffect(1, sonido, false);
 							}
 						}
 						if (mobs.isEmpty()) {
@@ -549,12 +550,12 @@ public class Game {
 							player.updateStat();
 							gameover = true;
 							gameoverDelay = 2000;
-							explosion.playAsSoundEffect(1, 1, false);
+							explosion.playAsSoundEffect(1, sonido, false);
 						} else {
 							double dmg = bullet.getDmg() - player.getDefense();
 							if (dmg > 0) {
 								console.addString(bullet.getDmg() + " dmg points.", textoNormal);
-								damage.playAsSoundEffect(1, 1, false);
+								damage.playAsSoundEffect(1, sonido, false);
 							}
 						}
 						bulletsEnemigas.remove(b);
@@ -572,12 +573,12 @@ public class Game {
 					Mouse.setGrabbed(false);
 					Mouse.setCursorPosition(punteroLocation.getX(), punteroLocation.getY());
 				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_F1) {
-					explosion.playAsMusic(1, 1, false);
-				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_F2) {
-					salto.playAsSoundEffect(1, 1, false);
-				}
+//				if (Keyboard.getEventKey() == Keyboard.KEY_F1) {
+//					explosion.playAsMusic(1, sonido, false);
+//				}
+//				if (Keyboard.getEventKey() == Keyboard.KEY_F2) {
+//					salto.playAsSoundEffect(1, sonido, false);
+//				}
 				if (Keyboard.getEventKey() == Keyboard.KEY_F5) {
 					gameover = true;
 				}
@@ -588,6 +589,94 @@ public class Game {
 			if (Mouse.getEventButtonState()) {
 				if (!Mouse.isGrabbed()) {
 					Mouse.setGrabbed(true);
+				} else {
+					int x = Mouse.getEventX();
+					int y = height - Mouse.getEventY();
+					if (menuMapOptions.contains(x, y)) {
+						y -= menuMapOptions.y;
+						int p = (int) (y / (bigfont.getLineHeight() * 1.5));
+						switch (p) {
+							case 0:
+								console.addString("You clicked 24x24", textoNormal);
+								juegoNuevo(24, 24);
+								select.playAsSoundEffect(1, sonido, false);
+								break;
+							case 1:
+								if (!Map.map_1) {
+									console.addString("Level not open yet. WORK HARDER!!!", textoNormal);
+									break;
+								}
+								console.addString("You clicked 20x20", textoNormal);
+								juegoNuevo(20, 20);
+								select.playAsSoundEffect(1, sonido, false);
+								break;
+							case 2:
+								if (!Map.map_2) {
+									console.addString("Level not open yet. WORK HARDER!!!", textoNormal);
+									break;
+								}
+								console.addString("You clicked 16x16", textoNormal);
+								juegoNuevo(16, 16);
+								select.playAsSoundEffect(1, sonido, false);
+								break;
+							case 3:
+								if (!Map.map_3) {
+									console.addString("Level not open yet. WORK HARDER!!!", textoNormal);
+									break;
+								}
+								console.addString("You clicked 12x12", textoNormal);
+								juegoNuevo(12, 12);
+								select.playAsSoundEffect(1, sonido, false);
+								break;
+							case 4:
+								if (Map.map_4) {
+									console.addString("You clicked 8x8", textoNormal);
+									juegoNuevo(8, 8);
+									select.playAsSoundEffect(1, sonido, false);
+								}
+								break;
+						}
+					}
+					if (defShopRect.contains(x, y)) {
+						if (defShopPrize == 0) {
+							console.addString("Sorry, you are maxed.", textoNormal);
+						} else if (player.getGold() >= defShopPrize) {
+							player.setArmor(defShop);
+							player.removeGold(defShopPrize);
+							shop.playAsSoundEffect(1, sonido, false);
+							defShop++;
+							if (defShop < Armor.armors.length) {
+								defShopPrize = defShop * defShop * defShop * 250;
+								console.addString("Defense Upgraded", textoNormal);
+							} else {
+								console.addString("Good job!!! Defense Maxed", textoNormal);
+								defShop--;
+								defShopPrize = 0;
+							}
+						} else {
+							console.addString("No money, no upgrade :(.", textoNormal);
+						}
+					}
+					if (arrShopRect.contains(x, y)) {
+						if (arrShopPrize == 0) {
+							console.addString("Sorry, you are maxed.", textoNormal);
+						} else if (player.getGold() >= arrShopPrize) {
+							player.setArrow(arrShop);
+							player.removeGold(arrShopPrize);
+							shop.playAsSoundEffect(1, sonido, false);
+							arrShop++;
+							if (arrShop < Arrow.arrows.length) {
+								arrShopPrize = arrShop * arrShop * 250;
+								console.addString("Weapon Upgraded", textoNormal);
+							} else {
+								console.addString("Good job!!! Weapon Maxed", textoNormal);
+								arrShop--;
+								arrShopPrize = 0;
+							}
+						} else {
+							console.addString("No money, no upgrade :(.", textoNormal);
+						}
+					}
 				}
 			}
 		}
