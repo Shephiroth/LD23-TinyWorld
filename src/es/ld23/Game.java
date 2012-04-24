@@ -288,282 +288,176 @@ public class Game {
 		renderPuntero();
 	}
 
-	private void tickGameover(long delta) {
-		if (gameoverDelay > 0) {
-			gameoverDelay -= delta;
-		} else {
-			while (Keyboard.next()) {
-				if (Keyboard.getEventKeyState()) {
-					if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
-						Mouse.setGrabbed(false);
-						Mouse.setCursorPosition(punteroLocation.getX(), punteroLocation.getY());
-					}
-				}
-			}
-			while (Mouse.next()) {
-				if (Mouse.getEventButtonState()) {
-					if (!Mouse.isGrabbed()) {
-						Mouse.setGrabbed(true);
-					} else {
-						int x = Mouse.getEventX();
-						int y = height - Mouse.getEventY();
-						if (menuMapOptions.contains(x, y)) {
-							y -= menuMapOptions.y;
-							int p = (int) (y / (bigfont.getLineHeight() * 1.5));
-							switch (p) {
-								case 0:
-									console.addString("You clicked 24x24", textoNormal);
-									juegoNuevo(24, 24);
-									select.playAsSoundEffect(1, sonido, false);
-									break;
-								case 1:
-									if (!Map.map_1) {
-										console.addString("Level not open yet. WORK HARDER!!!", textoNormal);
-										break;
-									}
-									console.addString("You clicked 20x20", textoNormal);
-									juegoNuevo(20, 20);
-									select.playAsSoundEffect(1, sonido, false);
-									break;
-								case 2:
-									if (!Map.map_2) {
-										console.addString("Level not open yet. WORK HARDER!!!", textoNormal);
-										break;
-									}
-									console.addString("You clicked 16x16", textoNormal);
-									juegoNuevo(16, 16);
-									select.playAsSoundEffect(1, sonido, false);
-									break;
-								case 3:
-									if (!Map.map_3) {
-										console.addString("Level not open yet. WORK HARDER!!!", textoNormal);
-										break;
-									}
-									console.addString("You clicked 12x12", textoNormal);
-									juegoNuevo(12, 12);
-									select.playAsSoundEffect(1, sonido, false);
-									break;
-								case 4:
-									if (Map.map_4) {
-										console.addString("You clicked 8x8", textoNormal);
-										juegoNuevo(8, 8);
-										select.playAsSoundEffect(1, sonido, false);
-									}
-									break;
-							}
-						}
-						if (defShopRect.contains(x, y)) {
-							if (defShopPrize == 0) {
-								console.addString("Sorry, you are maxed.", textoNormal);
-							} else if (player.getGold() >= defShopPrize) {
-								player.setArmor(defShop);
-								player.removeGold(defShopPrize);
-								shop.playAsSoundEffect(1, sonido, false);
-								defShop++;
-								if (defShop < Armor.armors.length) {
-									defShopPrize = defShop * defShop * defShop * 250;
-									console.addString("Defense Upgraded", textoNormal);
-								} else {
-									console.addString("Good job!!! Defense Maxed", textoNormal);
-									defShop--;
-									defShopPrize = 0;
-								}
-							} else {
-								console.addString("No money, no upgrade :(.", textoNormal);
-							}
-						}
-						if (arrShopRect.contains(x, y)) {
-							if (arrShopPrize == 0) {
-								console.addString("Sorry, you are maxed.", textoNormal);
-							} else if (player.getGold() >= arrShopPrize) {
-								player.setArrow(arrShop);
-								player.removeGold(arrShopPrize);
-								shop.playAsSoundEffect(1, sonido, false);
-								arrShop++;
-								if (arrShop < Arrow.arrows.length) {
-									arrShopPrize = arrShop * arrShop * 250;
-									console.addString("Weapon Upgraded", textoNormal);
-								} else {
-									console.addString("Good job!!! Weapon Maxed", textoNormal);
-									arrShop--;
-									arrShopPrize = 0;
-								}
-							} else {
-								console.addString("No money, no upgrade :(.", textoNormal);
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
 	public void tick(long delta) {
 		if (delta == 0) {
 			return;
 		}
 		punteroLocation.setLocation(Mouse.getX(), Mouse.getY());
 		if (gameover) {
-			tickGameover(delta);
-			return;
-		}
-		boolean izq = Keyboard.isKeyDown(Keyboard.KEY_A) || Keyboard.isKeyDown(Keyboard.KEY_LEFT);
-		boolean der = Keyboard.isKeyDown(Keyboard.KEY_D) || Keyboard.isKeyDown(Keyboard.KEY_RIGHT);
-		boolean arr = Keyboard.isKeyDown(Keyboard.KEY_W) || Keyboard.isKeyDown(Keyboard.KEY_UP);
-		boolean aba = Keyboard.isKeyDown(Keyboard.KEY_S) || Keyboard.isKeyDown(Keyboard.KEY_DOWN);
-		boolean action = Keyboard.isKeyDown(Keyboard.KEY_SPACE) || Keyboard.isKeyDown(Keyboard.KEY_LCONTROL);
+			if (gameoverDelay > 0) {
+				gameoverDelay -= delta;
+				return;
+			}
+//			tickGameover(delta);
+		} else {
+			boolean izq = Keyboard.isKeyDown(Keyboard.KEY_A) || Keyboard.isKeyDown(Keyboard.KEY_LEFT);
+			boolean der = Keyboard.isKeyDown(Keyboard.KEY_D) || Keyboard.isKeyDown(Keyboard.KEY_RIGHT);
+			boolean arr = Keyboard.isKeyDown(Keyboard.KEY_W) || Keyboard.isKeyDown(Keyboard.KEY_UP);
+			boolean aba = Keyboard.isKeyDown(Keyboard.KEY_S) || Keyboard.isKeyDown(Keyboard.KEY_DOWN);
+			boolean action = Keyboard.isKeyDown(Keyboard.KEY_SPACE) || Keyboard.isKeyDown(Keyboard.KEY_LCONTROL);
 
-		if (izq && der) {
-			izq = der = false;
-		}
-		if (arr && aba) {
-			arr = aba = false;
-		}
-		double dx = 0;
-		double dy = 0;
-		if (izq) {
-			if (arr) {
-				dx -= delta * PC.walk_speed * PC.diagonal_change;
-				dy -= delta * PC.walk_speed * PC.diagonal_change;
-				playerDir = PC.PC_DIA_ARRIZQ;
-			} else if (aba) {
-				dx -= delta * PC.walk_speed * PC.diagonal_change;
-				dy += delta * PC.walk_speed * PC.diagonal_change;
-				playerDir = PC.PC_DIA_ABAIZQ;
-			} else {
-				dx -= delta * PC.walk_speed;
-				playerDir = PC.PC_MOVE_IZQ;
+			if (izq && der) {
+				izq = der = false;
 			}
-		} else if (der) {
-			if (arr) {
-				dx += delta * PC.walk_speed * PC.diagonal_change;
-				dy -= delta * PC.walk_speed * PC.diagonal_change;
-				playerDir = PC.PC_DIA_ARRDER;
-			} else if (aba) {
-				dx += delta * PC.walk_speed * PC.diagonal_change;
-				dy += delta * PC.walk_speed * PC.diagonal_change;
-				playerDir = PC.PC_DIA_ABADER;
-			} else {
-				dx += delta * PC.walk_speed;
-				playerDir = PC.PC_MOVE_DER;
+			if (arr && aba) {
+				arr = aba = false;
 			}
-		} else if (arr) {
-			dy -= delta * PC.walk_speed;
-			playerDir = PC.PC_MOVE_ARR;
-		} else if (aba) {
-			dy += delta * PC.walk_speed;
-			playerDir = PC.PC_MOVE_ABA;
-		}
-		player.tick(delta);
-		if (dx != 0 || dy != 0) {
-			BBRectangle playerbb = player.getBB().createMoved(dx, 0);
-			if (!checkBB(playerbb)) {
-				dx = 0;
-			}
-			playerbb = player.getBB().createMoved(dx, dy);
-			if (!checkBB(playerbb)) {
-				dy = 0;
-			}
-			player.walkTick(delta);
-			player.setTecladoState(izq, arr, der, aba);
-		}
-		if (dx != 0 || dy != 0) {
-			player.move(dx, dy);
-		}
-		if (!mobs.isEmpty()) {
-			BBRectangle p = player.getBB();
-			for (PC mob : mobs) {
-				mob.tick(delta);
-				if (!checkBB(mob.getBB()) || mob.getBB().collision(p)) {
-					mob.cancelMovement(delta);
+			double dx = 0;
+			double dy = 0;
+			if (izq) {
+				if (arr) {
+					dx -= delta * PC.walk_speed * PC.diagonal_change;
+					dy -= delta * PC.walk_speed * PC.diagonal_change;
+					playerDir = PC.PC_DIA_ARRIZQ;
+				} else if (aba) {
+					dx -= delta * PC.walk_speed * PC.diagonal_change;
+					dy += delta * PC.walk_speed * PC.diagonal_change;
+					playerDir = PC.PC_DIA_ABAIZQ;
+				} else {
+					dx -= delta * PC.walk_speed;
+					playerDir = PC.PC_MOVE_IZQ;
 				}
-				if (mob.canShoot()) {
-					if (Game.random.nextDouble() > 0.9) {
-						bulletsEnemigas.add(mob.fire());
-					} else {
-						mob.fakeFire();
+			} else if (der) {
+				if (arr) {
+					dx += delta * PC.walk_speed * PC.diagonal_change;
+					dy -= delta * PC.walk_speed * PC.diagonal_change;
+					playerDir = PC.PC_DIA_ARRDER;
+				} else if (aba) {
+					dx += delta * PC.walk_speed * PC.diagonal_change;
+					dy += delta * PC.walk_speed * PC.diagonal_change;
+					playerDir = PC.PC_DIA_ABADER;
+				} else {
+					dx += delta * PC.walk_speed;
+					playerDir = PC.PC_MOVE_DER;
+				}
+			} else if (arr) {
+				dy -= delta * PC.walk_speed;
+				playerDir = PC.PC_MOVE_ARR;
+			} else if (aba) {
+				dy += delta * PC.walk_speed;
+				playerDir = PC.PC_MOVE_ABA;
+			}
+			player.tick(delta);
+			if (dx != 0 || dy != 0) {
+				BBRectangle playerbb = player.getBB().createMoved(dx, 0);
+				if (!checkBB(playerbb)) {
+					dx = 0;
+				}
+				playerbb = player.getBB().createMoved(dx, dy);
+				if (!checkBB(playerbb)) {
+					dy = 0;
+				}
+				player.walkTick(delta);
+				player.setTecladoState(izq, arr, der, aba);
+			}
+			if (dx != 0 || dy != 0) {
+				player.move(dx, dy);
+			}
+			if (!mobs.isEmpty()) {
+				BBRectangle p = player.getBB();
+				for (PC mob : mobs) {
+					mob.tick(delta);
+					if (!checkBB(mob.getBB()) || mob.getBB().collision(p)) {
+						mob.cancelMovement(delta);
+					}
+					if (mob.canShoot()) {
+						if (Game.random.nextDouble() > 0.9) {
+							bulletsEnemigas.add(mob.fire());
+						} else {
+							mob.fakeFire();
+						}
 					}
 				}
 			}
-		}
-		if (action && player.canShoot()) {
-			Weapon arma = player.getWeapon();
-			if (arma != null) {
-				Bullet b = player.fire();
-				if (b != null) {
-					b.setDmg(player.getDmg());
-					b.setLocation(player.getX(), player.getY());
-					b.setDirection(playerDir);
-					bullets.add(b);
-					disparo.playAsSoundEffect(1,sonido, false);
+			if (action && player.canShoot()) {
+				Weapon arma = player.getWeapon();
+				if (arma != null) {
+					Bullet b = player.fire();
+					if (b != null) {
+						b.setDmg(player.getDmg());
+						b.setLocation(player.getX(), player.getY());
+						b.setDirection(playerDir);
+						bullets.add(b);
+						disparo.playAsSoundEffect(1, sonido, false);
+					}
 				}
 			}
-		}
-		if (!bullets.isEmpty()) {
-			BBRectangle mapBB = map.getBB();
-			for (int b = 0; b < bullets.size(); b++) {
-				Bullet bullet = bullets.get(b);
-				if (bullet.tick(delta)) {
-					if (!mapBB.isInside(bullet.getBB())) {
+			if (!bullets.isEmpty()) {
+				BBRectangle mapBB = map.getBB();
+				for (int b = 0; b < bullets.size(); b++) {
+					Bullet bullet = bullets.get(b);
+					if (bullet.tick(delta)) {
+						if (!mapBB.isInside(bullet.getBB())) {
+							bullets.remove(b);
+							b--;
+						}
+						if (!mobs.isEmpty()) {
+							for (int m = 0; m < mobs.size(); m++) {
+								PC mob = mobs.get(m);
+								if (mob.getBB().collision(bullet.getBB())) {
+									if (mob.hurt(bullet.getDmg())) {
+										mobs.remove(m);
+										console.addString(mob.getScore() + " exp points.", textoNormal);
+										player.addScore(mob.getScore());
+									}
+									bullets.remove(b);
+									b--;
+									m = mobs.size();
+									impacto.playAsSoundEffect(1, sonido, false);
+								}
+							}
+							if (mobs.isEmpty()) {
+								//last mob die
+								map.openNextLevel();
+								gameover = true;
+								player.updateStat();
+							}
+						}
+					} else {
 						bullets.remove(b);
 						b--;
 					}
-					if (!mobs.isEmpty()) {
-						for (int m = 0; m < mobs.size(); m++) {
-							PC mob = mobs.get(m);
-							if (mob.getBB().collision(bullet.getBB())) {
-								if (mob.hurt(bullet.getDmg())) {
-									mobs.remove(m);
-									console.addString(mob.getScore() + " exp points.", textoNormal);
-									player.addScore(mob.getScore());
-								}
-								bullets.remove(b);
-								b--;
-								m = mobs.size();
-								impacto.playAsSoundEffect(1, sonido, false);
-							}
-						}
-						if (mobs.isEmpty()) {
-							//last mob die
-							map.openNextLevel();
-							gameover = true;
-							player.updateStat();
-						}
-					}
-				} else {
-					bullets.remove(b);
-					b--;
 				}
 			}
-		}
-		if (!bulletsEnemigas.isEmpty()) {
-			BBRectangle mapBB = map.getBB();
-			for (int b = 0; b < bulletsEnemigas.size(); b++) {
-				Bullet bullet = bulletsEnemigas.get(b);
-				if (bullet.tick(delta)) {
-					if (!mapBB.isInside(bullet.getBB())) {
+			if (!bulletsEnemigas.isEmpty()) {
+				BBRectangle mapBB = map.getBB();
+				for (int b = 0; b < bulletsEnemigas.size(); b++) {
+					Bullet bullet = bulletsEnemigas.get(b);
+					if (bullet.tick(delta)) {
+						if (!mapBB.isInside(bullet.getBB())) {
+							bulletsEnemigas.remove(b);
+							b--;
+						}
+						if (bullet.getBB().collision(player.getBB())) {
+							if (player.hurt(bullet.getDmg())) {
+								player.updateStat();
+								gameover = true;
+								gameoverDelay = 2000;
+								explosion.playAsSoundEffect(1, sonido, false);
+							} else {
+								double dmg = bullet.getDmg() - player.getDefense();
+								if (dmg > 0) {
+									console.addString(bullet.getDmg() + " dmg points.", textoNormal);
+									damage.playAsSoundEffect(1, sonido, false);
+								}
+							}
+							bulletsEnemigas.remove(b);
+							b = bulletsEnemigas.size();
+						}
+					} else {
 						bulletsEnemigas.remove(b);
 						b--;
 					}
-					if (bullet.getBB().collision(player.getBB())) {
-						if (player.hurt(bullet.getDmg())) {
-							player.updateStat();
-							gameover = true;
-							gameoverDelay = 2000;
-							explosion.playAsSoundEffect(1, sonido, false);
-						} else {
-							double dmg = bullet.getDmg() - player.getDefense();
-							if (dmg > 0) {
-								console.addString(bullet.getDmg() + " dmg points.", textoNormal);
-								damage.playAsSoundEffect(1, sonido, false);
-							}
-						}
-						bulletsEnemigas.remove(b);
-						b = bulletsEnemigas.size();
-					}
-				} else {
-					bulletsEnemigas.remove(b);
-					b--;
 				}
 			}
 		}
